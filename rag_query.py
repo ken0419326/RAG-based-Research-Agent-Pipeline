@@ -5,26 +5,21 @@ import chromadb
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 
-# 載入環境變數
 load_dotenv()
 
-# --- 配置 ---
 CHROMA_PATH = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL", "paraphrase-multilingual-MiniLM-L12-v2")
 
 class RAGQuerySystem:
     def __init__(self):
-        # 1. 初始化 Embedding Model
         self.embed_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
         
-        # 2. 連接 Vector DB
         self.db_client = chromadb.PersistentClient(path=CHROMA_PATH)
         self.collection = self.db_client.get_or_create_collection(name="acl_research")
         
-        # 3. 初始化 OpenAI Client (LiteLLM 接口)
         self.client = OpenAI(
             api_key=os.getenv("LITELLM_API_KEY"),
-            base_url=os.getenv("LITELLM_BASE_URL") # 填入 https://litellm.netdb.csie.ncku.edu.tw
+            base_url=os.getenv("LITELLM_BASE_URL")
         )
         
         # 4. 對話歷史
@@ -58,15 +53,12 @@ class RAGQuerySystem:
             "若資料不足請直說。回答需專業且精確，並在適當時機引用來源標籤。"
         )
 
-        # 建立訊息清單
         messages = [{"role": "system", "content": system_prompt}]
-        # 加入歷史紀錄 (最近 3 輪 = 6 條)
         messages.extend(self.history[-6:])
         
         user_content = f"--- 參考資料 ---\n{context_str}\n\n--- 問題 ---\n{query}"
         messages.append({"role": "user", "content": user_content})
 
-        # 呼叫 API (符合你提供的範例寫法)
         response = self.client.chat.completions.create(
             model=model,
             messages=messages
@@ -74,7 +66,6 @@ class RAGQuerySystem:
 
         answer = response.choices[0].message.content
         
-        # 儲存對話
         self.history.append({"role": "user", "content": query})
         self.history.append({"role": "assistant", "content": answer})
         
@@ -90,12 +81,10 @@ def main():
     rag = RAGQuerySystem()
 
     if args.query:
-        # 單次查詢
         context = rag.retrieve(args.query, top_k=args.top_k)
         answer, sources = rag.generate_answer(args.query, context, model=args.model)
         print(f"\n回答：\n{answer}\n\n引用來源：{sources}")
     else:
-        # 互動模式
         print("已進入互動模式 (輸入 exit 離開)")
         while True:
             u_input = input("\n問題: ")
