@@ -28,13 +28,12 @@ class SkillBuilder:
             "主要的作者、研究機構、或資料來源有哪些？"
         ]
 
-    def rag_retrieve(self, query, top_k=2): # 調小 top_k 減少伺服器負擔
+    def rag_retrieve(self, query, top_k=2):
         query_vector = self.embed_model.encode(query).tolist()
         results = self.collection.query(query_embeddings=[query_vector], n_results=top_k)
         return "\n".join(results['documents'][0])
 
     def build_skill(self, output_file="skill.md"):
-        # --- 1. 讀取進度 ---
         if os.path.exists(TEMP_FILE):
             print(f"偵測到暫存檔 {TEMP_FILE}，正在載入已完成的洞察...")
             with open(TEMP_FILE, "r", encoding="utf-8") as f:
@@ -42,7 +41,6 @@ class SkillBuilder:
         else:
             intermediate_insights = []
 
-        # --- 2. 主題掃描 (僅跑未完成的部分) ---
         start_idx = len(intermediate_insights)
         if start_idx < len(self.scan_queries):
             print(f"開始主題掃描 (從第 {start_idx + 1} 個問題開始)...")
@@ -59,22 +57,20 @@ class SkillBuilder:
                             {"role": "system", "content": "你是一個專業的學術知識提取器。"},
                             {"role": "user", "content": f"參考資料：\n{context}\n\n問題：{q}"}
                         ],
-                        timeout=120 # 設定超時
+                        timeout=120
                     )
                     insight = response.choices[0].message.content
                     intermediate_insights.append({"query": q, "insight": insight})
                     
-                    # 每次成功就寫入一次暫存檔
                     with open(TEMP_FILE, "w", encoding="utf-8") as f:
                         json.dump(intermediate_insights, f, ensure_ascii=False, indent=2)
                     
                     print(f"維度 {i+1} 完成並已存檔。")
-                    time.sleep(5) # 禮貌延遲
+                    time.sleep(5)
                 except Exception as e:
                     print(f"維度 {i+1} 失敗: {e}。請稍後重新執行程式。")
-                    return # 發生錯誤就中斷，下次跑會從這題開始
+                    return
 
-        # --- 3. 最終整合階段 ---
         print("正在進行最後的 Skill.md 整合...")
         all_context = "\n\n".join([f"### {item['query']}\n{item['insight']}" for item in intermediate_insights])
         
@@ -135,7 +131,6 @@ class SkillBuilder:
                 f.write(final_res.choices[0].message.content)
             
             print(f"成功生成 {output_file}！")
-            # 任務完成後刪除暫存檔
             if os.path.exists(TEMP_FILE):
                 os.remove(TEMP_FILE)
                 
