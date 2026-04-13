@@ -4,7 +4,6 @@ from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
-# --- 設定 ---
 RAW_DIR, PROCESSED_DIR = "data/raw", "data/processed"
 CHROMA_PATH = "chroma_db"
 MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
@@ -28,7 +27,6 @@ class DataUpdatePipeline:
             shutil.rmtree(PROCESSED_DIR, ignore_errors=True)
             os.makedirs(PROCESSED_DIR, exist_ok=True)
 
-        # 這裡印出路徑，確認程式看哪裡
         abs_raw_path = os.path.abspath(RAW_DIR)
         print(f"正在檢查目錄: {abs_raw_path}")
         
@@ -51,7 +49,6 @@ class DataUpdatePipeline:
             metadata_part = ""
             body_part = ""
             
-            # 偵測 JSON
             if os.path.exists(json_meta_path):
                 try:
                     with open(json_meta_path, 'r', encoding='utf-8') as f:
