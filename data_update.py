@@ -11,7 +11,7 @@ MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
 
 class DataUpdatePipeline:
     def __init__(self):
-        print(f"📦 正在載入 Embedding 模型: {MODEL_NAME}...")
+        print(f"正在載入 Embedding 模型: {MODEL_NAME}...")
         self.model = SentenceTransformer(MODEL_NAME)
         self.db_client = chromadb.PersistentClient(path=CHROMA_PATH)
         self.collection = self.db_client.get_or_create_collection(name="acl_research")
@@ -24,19 +24,19 @@ class DataUpdatePipeline:
 
     def process_content(self, rebuild=False):
         if rebuild:
-            print(f"🧹正在清空 {PROCESSED_DIR}...")
+            print(f"正在清空 {PROCESSED_DIR}...")
             shutil.rmtree(PROCESSED_DIR, ignore_errors=True)
             os.makedirs(PROCESSED_DIR, exist_ok=True)
 
         # 這裡印出路徑，確認程式看哪裡
         abs_raw_path = os.path.abspath(RAW_DIR)
-        print(f"📂 正在檢查目錄: {abs_raw_path}")
+        print(f"正在檢查目錄: {abs_raw_path}")
         
         raw_files = [f for f in os.listdir(RAW_DIR) if f.lower().endswith(('.pdf', '.md', '.txt'))]
         print(f"找到 {len(raw_files)} 個原始檔案: {raw_files}")
 
         if not raw_files:
-            print("❌ 錯誤：在 data/raw 中找不到任何 PDF, MD 或 TXT 檔案！請確認路徑。")
+            print("錯誤：在 data/raw 中找不到任何 PDF, MD 或 TXT 檔案！請確認路徑。")
             return
 
         for filename in tqdm(raw_files, desc="解析檔案"):
@@ -63,7 +63,7 @@ class DataUpdatePipeline:
                         metadata_part += "--- CONTENT_START ---\n"
                 except: pass
             else:
-                print(f"  ⚠️ 找不到對應的 JSON 描述檔: {base_name}.json")
+                print(f"找不到對應的 JSON 描述檔: {base_name}.json")
 
             try:
                 if ext == "pdf":
@@ -81,17 +81,17 @@ class DataUpdatePipeline:
                     f.write(metadata_part + self.clean_text(body_part))
                     
             except Exception as e:
-                print(f"❌ 無法解析 {filename}: {e}")
+                print(f"無法解析 {filename}: {e}")
 
     def index_data(self, rebuild=False):
         if rebuild:
-            print("🔄 重置 Vector DB...")
+            print("重置 Vector DB...")
             try: self.db_client.delete_collection("acl_research")
             except: pass
             self.collection = self.db_client.create_collection("acl_research")
 
         txt_files = [f for f in os.listdir(PROCESSED_DIR) if f.endswith('.txt')]
-        print(f"📝 準備向量化 {len(txt_files)} 個處理後的文字檔...")
+        print(f"準備向量化 {len(txt_files)} 個處理後的文字檔...")
 
         for txt_file in tqdm(txt_files, desc="建立索引"):
             path = os.path.join(PROCESSED_DIR, txt_file)
@@ -122,7 +122,7 @@ class DataUpdatePipeline:
     def run(self, rebuild):
         self.process_content(rebuild)
         self.index_data(rebuild)
-        print(f"🚀 完成！目前 DB 片段總數: {self.collection.count()}")
+        print(f"完成！目前 DB 片段總數: {self.collection.count()}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
