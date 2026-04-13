@@ -1,0 +1,12 @@
+# Python 3.13.7
+python-dotenv
+tqdm
+pypdf
+langchain-text-splitters
+chromadb
+sentence-transformers
+torch
+openai
+litellm
+grpcio
+protobuf
