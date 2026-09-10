@@ -14,11 +14,15 @@ def load_config() -> AppConfig:
 
 
 def test_ingestion_missing_directory_fails_before_heavy_initialization(tmp_path):
-    config = replace(load_config(), raw_dir=tmp_path / "missing")
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text("[]")
+    config = replace(
+        load_config(), raw_dir=tmp_path / "missing", corpus_manifest_path=manifest_path
+    )
     pipeline = DataUpdatePipeline(config=config)
 
     with pytest.raises(ConfigurationError, match="Raw data directory"):
-        pipeline.run(rebuild=True)
+        pipeline.prepare_only()
 
     assert pipeline.model is None
     assert pipeline.db_client is None
@@ -49,7 +53,7 @@ def test_generation_missing_configuration_does_not_create_client():
 def test_ingestion_cli_returns_nonzero_for_missing_input(monkeypatch, tmp_path, capsys):
     monkeypatch.setenv("RAW_DATA_DIR", str(tmp_path / "missing"))
 
-    assert data_update.main([]) == 2
+    assert data_update.main(["--prepare-only"]) == 2
     assert "Configuration error" in capsys.readouterr().err
 
 

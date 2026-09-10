@@ -13,7 +13,7 @@
 ```mermaid
 graph LR
     A[data/raw PDF] --> B[data_update.py]
-    B --> C{RecursiveCharacter\nChunking}
+    B --> C{Page-local 750/100\nCharacter Chunking}
     C --> D[Sentence-Transformer\nMiniLM-L12]
     D --> E[(ChromaDB)]
     E --> F[rag_query.py]
@@ -41,8 +41,8 @@ graph LR
     * **設計邏輯**：強制要求模型根據參考資料回答，並列出引用來源。若資料不足則必須誠實回答「不知道」。
     * **決策理由**：有效抑制 LLM 產生幻覺（Hallucination）。
 * **Idempotency 設計**：
-    * **實作方式**：data_update.py 透過 --rebuild 參數確保冪等性。
-    * **決策理由**：執行時若帶此參數，會清空舊目錄重新構建，確保索引與當前資料夾內容完全一致。
+    * **實作方式**：`--build-index` 每次建立新的 Chroma collection，完整驗證後才 atomic 更新 active pointer。
+    * **決策理由**：build 或 validation 失敗時保留先前 active collection；舊 validated collections 不會自動刪除。
 
 ## 4. 環境設定與執行方式
 
@@ -76,8 +76,8 @@ uv run python downloader.py
 # ⑤ 解析 manifest 中的 PDF 並產生 structured chunks（不載入 embedding/ChromaDB）
 uv run python data_update.py --prepare-only
 
-# ⑥ 全量重建索引
-uv run python data_update.py --rebuild
+# ⑥ 建立並驗證新的 Chroma collection，成功後切換 active pointer
+uv run python data_update.py --build-index
 
 # ⑦ 測試 RAG 問答（需要 LLM_* 設定）
 uv run python rag_query.py
@@ -87,6 +87,8 @@ uv run python skill_builder.py --output skill.md
 ```
 
 `--prepare-only` 僅處理 fixed manifest 的 50 份 PDF，逐頁使用 `pypdf` 擷取全文並將 provenance-rich chunks 原子寫入 Git-ignored 的 `data/processed/chunks.jsonl`。摘要輸出會分別列出 selected、parsed、failed、empty、pages 與 chunks；此命令不需要 embedding model、ChromaDB 或 LLM credentials。
+
+`--build-index` 僅以 `data/processed/chunks.jsonl` 為輸入，分批建立新的 Chroma collection。Collection count、paper coverage、embedding dimension 與 sample readability 全部驗證成功後，才會更新 `chroma_db/index_manifest.json` 與 `chroma_db/active_index.json`；失敗不會切換 active collection，舊 collections 也不會自動刪除。此命令使用設定的 embedding model，但不需要 LLM credentials。
 
 #### Downloader 行為
 

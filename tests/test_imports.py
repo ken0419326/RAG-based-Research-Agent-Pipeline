@@ -66,7 +66,7 @@ def test_ingestion_cli_runs_from_a_different_current_directory(tmp_path):
     environment["RAW_DATA_DIR"] = str(missing_raw_dir)
 
     result = subprocess.run(
-        [sys.executable, str(PROJECT_ROOT / "data_update.py")],
+        [sys.executable, str(PROJECT_ROOT / "data_update.py"), "--prepare-only"],
         cwd=tmp_path,
         env=environment,
         capture_output=True,

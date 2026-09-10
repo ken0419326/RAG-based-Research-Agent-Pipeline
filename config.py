@@ -99,6 +99,19 @@ class AppConfig:
                 "Run downloader.py first or set RAW_DATA_DIR."
             )
 
+    def validate_index_build(self) -> None:
+        """Validate local index inputs without loading a model or opening ChromaDB."""
+        chunks_path = self.processed_dir / "chunks.jsonl"
+        if not self.corpus_manifest_path.is_file():
+            raise ConfigurationError(
+                f"Corpus manifest does not exist: {self.corpus_manifest_path}."
+            )
+        if not chunks_path.is_file():
+            raise ConfigurationError(
+                f"Prepared chunks do not exist: {chunks_path}. "
+                "Run data_update.py --prepare-only first."
+            )
+
     def validate_retrieval(self) -> None:
         """Validate retrieval inputs without requiring an LLM or loading a model."""
         if not self.chroma_path.is_dir() or not any(self.chroma_path.iterdir()):
