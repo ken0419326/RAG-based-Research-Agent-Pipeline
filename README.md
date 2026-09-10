@@ -61,7 +61,7 @@ uv sync --locked --all-groups
 cp .env.example .env
 ```
 
-Corpus acquisition、ingestion 與 indexing 不需要 LLM credentials。目前的問答與報告生成則需要在 `.env` 設定 provider-neutral 的 `LLM_BASE_URL`、`LLM_API_KEY` 與 `LLM_MODEL`。Groq 可作為 OpenAI-compatible provider 的範例，但 application logic 不依賴 Groq；endpoint、model availability、free tier 與 rate limits 可能變動，使用前請查閱 provider 的最新官方文件。
+Corpus acquisition、ingestion、indexing 與 retrieval-only 查詢不需要 LLM credentials。目前的回答與報告生成則需要在 `.env` 設定 provider-neutral 的 `LLM_BASE_URL`、`LLM_API_KEY` 與 `LLM_MODEL`。Groq 可作為 OpenAI-compatible provider 的範例，但 application logic 不依賴 Groq；endpoint、model availability、free tier 與 rate limits 可能變動，使用前請查閱 provider 的最新官方文件。
 
 所有相對路徑均以 project root 解析，而不是呼叫命令時的 current working directory。
 
@@ -79,16 +79,21 @@ uv run python data_update.py --prepare-only
 # ⑥ 建立並驗證新的 Chroma collection，成功後切換 active pointer
 uv run python data_update.py --build-index
 
-# ⑦ 測試 RAG 問答（需要 LLM_* 設定）
+# ⑦ Retrieval-only 查詢（不需要 LLM_*；可加 --json 取得 JSON）
+uv run python rag_query.py --query "your question" --top-k 5 --retrieval-only
+
+# ⑧ 測試 RAG 問答（需要 LLM_* 設定）
 uv run python rag_query.py
 
-# ⑧ 生成 Skill 文件（需要 LLM_* 設定）
+# ⑨ 生成 Skill 文件（需要 LLM_* 設定）
 uv run python skill_builder.py --output skill.md
 ```
 
 `--prepare-only` 僅處理 fixed manifest 的 50 份 PDF，逐頁使用 `pypdf` 擷取全文並將 provenance-rich chunks 原子寫入 Git-ignored 的 `data/processed/chunks.jsonl`。摘要輸出會分別列出 selected、parsed、failed、empty、pages 與 chunks；此命令不需要 embedding model、ChromaDB 或 LLM credentials。
 
 `--build-index` 僅以 `data/processed/chunks.jsonl` 為輸入，分批建立新的 Chroma collection。Collection count、paper coverage、embedding dimension 與 sample readability 全部驗證成功後，才會更新 `chroma_db/index_manifest.json` 與 `chroma_db/active_index.json`；失敗不會切換 active collection，舊 collections 也不會自動刪除。此命令使用設定的 embedding model，但不需要 LLM credentials。
+
+`--retrieval-only` 只會開啟 active pointer 指定的既有 collection，不會建立空 collection 或初始化 LLM client。結果依 Chroma 回傳順序列出 `[S1]`、`[S2]` 等 response-level source IDs，以及明確標為 distance 的距離值、paper/chunk provenance 與 passage text；distance 不是 accuracy。加上 `--json` 可輸出相同欄位的 JSON array。
 
 #### Downloader 行為
 
