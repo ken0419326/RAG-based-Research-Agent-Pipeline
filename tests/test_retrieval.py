@@ -119,6 +119,7 @@ def test_active_pointer_and_manifest_are_validated(tmp_path):
     assert active.collection_name == "active-test"
     assert active.embedding_model == "test-model"
     assert active.embedding_dimension == 3
+    assert active.corpus_manifest_sha256 == "b" * 64
 
     (config.chroma_path / "active_index.json").write_text(
         json.dumps({"collection_name": "different"})

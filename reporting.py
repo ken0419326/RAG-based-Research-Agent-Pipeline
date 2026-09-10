@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -120,7 +121,9 @@ def render_report(
     results: list[dict[str, Any]],
     *,
     index_identity: str,
+    corpus_manifest_sha256: str,
     embedding_model: str,
+    generation_model: str,
 ) -> str:
     sections = []
     for result in results:
@@ -133,7 +136,10 @@ def render_report(
         "> 此報告由固定 corpus 的 active index 產生；來源表完全由 verified "
         "retrieval metadata 程式化建立。Citation ID validation 不代表內容事實正確。\n\n"
         f"- Index identity: `{index_identity}`\n"
-        f"- Embedding model: `{embedding_model}`\n\n"
+        f"- Corpus manifest SHA-256: `{corpus_manifest_sha256}`\n"
+        f"- Embedding model: `{embedding_model}`\n"
+        f"- Generation model: `{generation_model}`\n"
+        f"- Generated at: `{datetime.now(UTC).isoformat()}`\n\n"
         + "\n\n".join(sections)
         + "\n\n## Source References\n\n"
         + source_table

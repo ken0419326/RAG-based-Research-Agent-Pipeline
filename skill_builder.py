@@ -91,6 +91,13 @@ class SkillBuilder:
                 sources,
                 model_override=self.model,
             )
+            if generated.invalid_source_ids:
+                raise ReportError(
+                    f"Question {question_id} returned invalid source IDs: "
+                    f"{', '.join(generated.invalid_source_ids)}."
+                )
+            if not generated.cited_source_ids:
+                raise ReportError(f"Question {question_id} returned no valid source citations.")
             self.client = self.generation_service.client
             checkpoint["completed_question_ids"].append(question_id)
             checkpoint["results"].append(
@@ -122,7 +129,9 @@ class SkillBuilder:
         report = render_report(
             checkpoint["results"],
             index_identity=active_index.index_identity,
+            corpus_manifest_sha256=active_index.corpus_manifest_sha256,
             embedding_model=active_index.embedding_model,
+            generation_model=self.model or self.config.llm_model or "",
         )
         atomic_write_text(output_path, report)
         return output_path

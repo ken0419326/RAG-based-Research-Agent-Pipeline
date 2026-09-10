@@ -1,0 +1,819 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-09-10T18:49:09.708316+00:00",
+  "query_count": 12,
+  "scored_query_count": 11,
+  "judgment_method": "Paper-level relevance was manually curated from manifest titles and sidecar abstracts; papers were not independently read in full for relevance judging.",
+  "ranking_method": "Retrieve 20 chunks, preserve Chroma order, deduplicate by first paper occurrence, and score the first 5 unique papers.",
+  "aggregate_metrics": {
+    "recall_at_5": 0.6363636363636364,
+    "mrr_at_5": 0.6136363636363636,
+    "ndcg_at_5": 0.565087860345856
+  },
+  "corpus_manifest_sha256": "d626d14633f48598b02d597e50f0fd448c01ea9128805877f04ae6e0c5c71c81",
+  "index_identity": "2a4945851cb63af1859800a4679b5a8334578d952cde7f229c882f000f7d3f71",
+  "embedding_model": "paraphrase-multilingual-MiniLM-L12-v2",
+  "embedding_dimension": 384,
+  "paper_count": 50,
+  "chunk_count": 5398,
+  "verified_ingestion_index_statistics": {
+    "selected_papers": 50,
+    "parsed_papers": 50,
+    "pages": 866,
+    "chunks": 5398,
+    "embedding_dimension": 384,
+    "index_build_duration_seconds": null,
+    "index_build_duration_note": "Not persisted in the active index manifest; no value is claimed."
+  },
+  "runtime": {
+    "python_version": "3.12.6",
+    "platform": "macOS-14.6-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "cpu_count": 8,
+    "hf_hub_offline": true,
+    "candidate_chunk_count": 20,
+    "paper_ranking_cutoff": 5,
+    "evaluation_duration_seconds": 0.31268329196609557,
+    "code_revision": "b64823ba20cca7b20cb2d81a8724bff17d81ad69",
+    "tracked_worktree_dirty": true,
+    "worktree_dirty_including_untracked": true
+  },
+  "queries": [
+    {
+      "query_id": "zh_alignment",
+      "query": "大型語言模型如何進行人類價值對齊，並衡量不同價值之間的取捨？",
+      "language": "zh-TW",
+      "category": "cross_language",
+      "relevant_paper_ids": [
+        "2026.findings-acl.1749",
+        "2025.acl-long.1408"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "兩篇摘要分別討論alignment intervention造成的value trade-offs，以及value principles的系統化評估。",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2026.findings-acl.1749",
+          "title": "Value Alignment Tax: Measuring Value Trade-offs in LLM Alignment",
+          "best_chunk_id": "8de65b9e3cbab7007eb24d947cc6de1774d305c5d93072ae25c4a38e556175a6",
+          "page": 11,
+          "distance": 7.284494400024414,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2025.acl-long.1395",
+          "title": "Dialogue Systems for Emotional Support via Value Reinforcement",
+          "best_chunk_id": "2333c72d1691fe11342f39ea1fbc4dbb3ef0681c9a6c3e8f557cf903c6c786cd",
+          "page": 12,
+          "distance": 7.351483345031738,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2025.acl-long.1408",
+          "title": "Towards Better Value Principles for Large Language Model Alignment: A Systematic Evaluation and Enhancement",
+          "best_chunk_id": "8b167eac2fedd2384893bebbc31b55a81a0a530dfff4c4d61fcbd4e366f1dbee",
+          "page": 10,
+          "distance": 8.38538932800293,
+          "chunk_rank": 4
+        },
+        {
+          "rank": 4,
+          "paper_id": "2026.acl-long.53",
+          "title": "EmoHarbor: Evaluating Personalized Emotional Support by Simulating the User’s Internal World",
+          "best_chunk_id": "45fbbc8b1a4f8d8107db718b309a7e6cf53cbd1793b9b15545c8974f8a8a1488",
+          "page": 21,
+          "distance": 8.411477088928223,
+          "chunk_rank": 5
+        },
+        {
+          "rank": 5,
+          "paper_id": "2025.findings-emnlp.1358",
+          "title": "Are LLMs Empathetic to All? Investigating the Influence of Multi-Demographic Personas on a Model’s Empathy",
+          "best_chunk_id": "b7a808fbcb7104d1cf6a95c1223689ba424a4930ef243bd1ea91596312405d2f",
+          "page": 8,
+          "distance": 8.826017379760742,
+          "chunk_rank": 8
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 1.0,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 0.9197207891481876
+      },
+      "retrieval_latency_ms": 144.89775011315942
+    },
+    {
+      "query_id": "zh_missing_modalities",
+      "query": "多模態對話情緒辨識如何處理模態缺失或不同模態互相衝突？",
+      "language": "zh-TW",
+      "category": "cross_language",
+      "relevant_paper_ids": [
+        "2026.findings-acl.1018",
+        "2026.findings-acl.813"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "EmoMM明確研究conflict與missingness；CaM-HG明確處理incomplete modalities。",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2025.acl-long.1235",
+          "title": "ReflectDiffu: Reflect between Emotion-intent Contagion and Mimicry for Empathetic Response Generation via a RL-Diffusion Framework",
+          "best_chunk_id": "b2f867cf68d0e5980d81478baa593bddc6d5a9e7f54983d897f928cb2c28eafc",
+          "page": 8,
+          "distance": 5.161746978759766,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2026.findings-eacl.212",
+          "title": "Emotion Recognition in Multi-Speaker Conversations through Speaker Identification, Knowledge Distillation, and Hierarchical Fusion",
+          "best_chunk_id": "7a821dae68c671783357a41f772ac12ba3e95a59ab8e0915b15529192e987e13",
+          "page": 1,
+          "distance": 5.165676593780518,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2025.acl-long.1148",
+          "title": "CoE: A Clue of Emotion Framework for Emotion Recognition in Conversations",
+          "best_chunk_id": "46b81f2f2d1e5c2c87ef97e21047eef5f5c24eb52b4d34172484e5d48681db26",
+          "page": 2,
+          "distance": 5.198991775512695,
+          "chunk_rank": 3
+        },
+        {
+          "rank": 4,
+          "paper_id": "2026.findings-acl.440",
+          "title": "EmotionTalk: An Interactive Chinese Multimodal Emotion Dataset With Rich Annotations",
+          "best_chunk_id": "e32a5a324a534846af2e29ecacba82b5ceada0a631026cf72b576aa7a56b27e5",
+          "page": 6,
+          "distance": 5.524714469909668,
+          "chunk_rank": 8
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.cas-1.9",
+          "title": "Exploring Cross-Modal Interactions in Unimodal and Multimodal Emotion Recognition: An Empirical Study",
+          "best_chunk_id": "5bf6805fc3e4984adc4c497281411cfe55f32a210a85709c1496ddb2ded944c8",
+          "page": 8,
+          "distance": 5.616683006286621,
+          "chunk_rank": 9
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 0.0,
+        "mrr_at_5": 0.0,
+        "ndcg_at_5": 0.0
+      },
+      "retrieval_latency_ms": 16.94445894099772
+    },
+    {
+      "query_id": "zh_theory_of_mind",
+      "query": "情緒支持對話如何利用心智理論中的信念、情緒與意圖來改善回應？",
+      "language": "zh-TW",
+      "category": "cross_language",
+      "relevant_paper_ids": [
+        "2026.lrec-1.212"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "MENTOS摘要明確描述Belief、Emotion與Intent的Theory-of-Mind中介推理。",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2026.findings-acl.844",
+          "title": "Beyond Semantic Similarity: Appraisal-Guided Chain-of-Thought Reasoning and Retrieval for Multimodal Emotional Support Conversations",
+          "best_chunk_id": "5a4204ff2a24f19c721fc675f404904f1c974cdfc84f629dd015b9ff87042a9c",
+          "page": 2,
+          "distance": 7.1052093505859375,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2025.acl-long.1148",
+          "title": "CoE: A Clue of Emotion Framework for Emotion Recognition in Conversations",
+          "best_chunk_id": "46b81f2f2d1e5c2c87ef97e21047eef5f5c24eb52b4d34172484e5d48681db26",
+          "page": 2,
+          "distance": 7.6070756912231445,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2026.findings-acl.1484",
+          "title": "CogEmp:A Cognitive Empathy-Oriented Dialogue System for Structured Psychological Counseling",
+          "best_chunk_id": "b793ce2d83b4f02cb05c3cf6a81c26b5e4d02e60bfcc9687dbbfde12d4b8c77b",
+          "page": 2,
+          "distance": 7.694565773010254,
+          "chunk_rank": 3
+        },
+        {
+          "rank": 4,
+          "paper_id": "2025.coling-main.10",
+          "title": "Sibyl: Empowering Empathetic Dialogue Generation in Large Language Models via Sensible and Visionary Commonsense Inference",
+          "best_chunk_id": "d4856fa31720650e454a13b93d76da724ee45d8b29687fa80f1e8af86d3b2d96",
+          "page": 7,
+          "distance": 7.765410423278809,
+          "chunk_rank": 4
+        },
+        {
+          "rank": 5,
+          "paper_id": "2025.acl-long.1235",
+          "title": "ReflectDiffu: Reflect between Emotion-intent Contagion and Mimicry for Empathetic Response Generation via a RL-Diffusion Framework",
+          "best_chunk_id": "b4f65a51741577719e11c6eaeff9b51bcf0415c4552e26bd8970241d1f4d3f70",
+          "page": 9,
+          "distance": 7.942112922668457,
+          "chunk_rank": 5
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 0.0,
+        "mrr_at_5": 0.0,
+        "ndcg_at_5": 0.0
+      },
+      "retrieval_latency_ms": 15.86824981495738
+    },
+    {
+      "query_id": "zh_cultural_empathy",
+      "query": "文化與人口背景如何影響大型語言模型的同理心表現？",
+      "language": "zh-TW",
+      "category": "multiple_relevant",
+      "relevant_paper_ids": [
+        "2025.findings-emnlp.1358",
+        "2025.ijcnlp-long.44",
+        "2026.lrec-1.210"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "三篇摘要分別涵蓋交叉人口persona、韓英文化同理心差距與希臘情境下的LLM同理心評估。",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2025.ijcnlp-long.44",
+          "title": "Multilingual, Not Multicultural: Uncovering the Cultural Empathy Gap in LLMs through a Comparative Empathetic Dialogue Benchmark",
+          "best_chunk_id": "93e48bfc0510fc50f009ab6a1cd497ff87b28a6354b2f7e3600ff7652c0810fd",
+          "page": 3,
+          "distance": 8.738912582397461,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2025.findings-emnlp.1358",
+          "title": "Are LLMs Empathetic to All? Investigating the Influence of Multi-Demographic Personas on a Model’s Empathy",
+          "best_chunk_id": "cfef626a58fb698713de6a68e3aba782f9e362ac9bf41e44db49257d9f18516d",
+          "page": 8,
+          "distance": 8.781692504882812,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2026.findings-acl.1813",
+          "title": "AEQ-Bench: Measuring Empathy of Omni-Modal Large Models",
+          "best_chunk_id": "a27ebf21ca665703ca77b7a4112adffd3e5de72ab87b6dbadf2f451dc7ab0984",
+          "page": 16,
+          "distance": 9.390909194946289,
+          "chunk_rank": 3
+        },
+        {
+          "rank": 4,
+          "paper_id": "2025.acl-long.925",
+          "title": "CULEMO: Cultural Lenses on Emotion - Benchmarking LLMs for Cross-Cultural Emotion Understanding",
+          "best_chunk_id": "5142d27ae984a2cf4f38cbb44df3b8dd201d66d4285229e27d28ac83be1a6ada",
+          "page": 2,
+          "distance": 10.39008903503418,
+          "chunk_rank": 9
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.findings-acl.1983",
+          "title": "Empathy Applicability Modeling for General Health Queries",
+          "best_chunk_id": "5053455beffe01b4d67ca965ae03288dcc26fb7e7072da4bc270e6f33ecd836d",
+          "page": 8,
+          "distance": 11.310615539550781,
+          "chunk_rank": 20
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 0.6666666666666666,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 0.7653606369886217
+      },
+      "retrieval_latency_ms": 14.46562516503036
+    },
+    {
+      "query_id": "en_grpo_modality",
+      "query": "Which approach uses GRPO to select modalities for multimodal emotion recognition?",
+      "language": "en",
+      "category": "english_topic",
+      "relevant_paper_ids": [
+        "2025.findings-emnlp.1059"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "The abstract explicitly identifies a GRPO-based adaptive modality selection module.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2025.nlpai4health-main.1",
+          "title": "Enhancing Patient-Centric Healthcare Communication Through Multimodal Emotion Recognition: A Transformer-Based Framework for Clinical Decision Support",
+          "best_chunk_id": "b27fac28b8b72cf6ec77a9e9d506e17f4bfbe2bf0c0390528895820f2e581dc5",
+          "page": 7,
+          "distance": 6.992367744445801,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2026.findings-acl.844",
+          "title": "Beyond Semantic Similarity: Appraisal-Guided Chain-of-Thought Reasoning and Retrieval for Multimodal Emotional Support Conversations",
+          "best_chunk_id": "a84f19dc50d9959b2c9d903a61e2fd5d3a9a7cad57b1f8e77b96feddc2b21cf3",
+          "page": 12,
+          "distance": 9.232610702514648,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2025.findings-emnlp.332",
+          "title": "Multimodal Emotion Recognition in Conversations: A Survey of Methods, Trends, Challenges and Prospects",
+          "best_chunk_id": "cdf8d0161733a64674c7c65877439d7e572f728ea6f8a8d98e8deecef2138326",
+          "page": 15,
+          "distance": 9.243451118469238,
+          "chunk_rank": 3
+        },
+        {
+          "rank": 4,
+          "paper_id": "2025.findings-emnlp.1059",
+          "title": "GRPO-Guided Modality Selection Enhanced LoRA-Tuned LLMs for Multimodal Emotion Recognition",
+          "best_chunk_id": "dcef6640d0208136a36c17caacdc47b46b439e434a8f3250c5b9cc8798f165a4",
+          "page": 1,
+          "distance": 9.261465072631836,
+          "chunk_rank": 4
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.acl-long.1875",
+          "title": "Emotion-Wheel-Guided Audio-Referred Text Representation for Multimodal Emotion Recognition in Conversation",
+          "best_chunk_id": "77bad3b450a63cb55a6cc152cb6ce89b6f486b64cb143494af1c44ddf74e2f92",
+          "page": 2,
+          "distance": 9.28397274017334,
+          "chunk_rank": 5
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 1.0,
+        "mrr_at_5": 0.25,
+        "ndcg_at_5": 0.43067655807339306
+      },
+      "retrieval_latency_ms": 15.722624957561493
+    },
+    {
+      "query_id": "en_missing_modality",
+      "query": "Methods for robust multimodal emotion recognition when modalities are missing or conflicting",
+      "language": "en",
+      "category": "english_topic",
+      "relevant_paper_ids": [
+        "2026.findings-acl.1018",
+        "2026.findings-acl.813"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "Both abstracts explicitly target missing or conflicting multimodal emotion evidence.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2025.nlpai4health-main.1",
+          "title": "Enhancing Patient-Centric Healthcare Communication Through Multimodal Emotion Recognition: A Transformer-Based Framework for Clinical Decision Support",
+          "best_chunk_id": "b27fac28b8b72cf6ec77a9e9d506e17f4bfbe2bf0c0390528895820f2e581dc5",
+          "page": 7,
+          "distance": 5.93492317199707,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2025.findings-emnlp.1358",
+          "title": "Are LLMs Empathetic to All? Investigating the Influence of Multi-Demographic Personas on a Model’s Empathy",
+          "best_chunk_id": "6b2b8d5e69961f69b2ee2180f1a7d1dc7ef2b12dd114c4562b21d7935ec4c094",
+          "page": 10,
+          "distance": 7.744837284088135,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2025.acl-short.88",
+          "title": "CHEER-Ekman: Fine-grained Embodied Emotion Classification",
+          "best_chunk_id": "89b2e52e494edb04282f7c0d4a6c38349a713d78a8dc01afac9f9c23bd7bc990",
+          "page": 3,
+          "distance": 7.845312118530273,
+          "chunk_rank": 3
+        },
+        {
+          "rank": 4,
+          "paper_id": "2026.cas-1.9",
+          "title": "Exploring Cross-Modal Interactions in Unimodal and Multimodal Emotion Recognition: An Empirical Study",
+          "best_chunk_id": "5bf6805fc3e4984adc4c497281411cfe55f32a210a85709c1496ddb2ded944c8",
+          "page": 8,
+          "distance": 8.5209321975708,
+          "chunk_rank": 4
+        },
+        {
+          "rank": 5,
+          "paper_id": "2025.acl-long.102",
+          "title": "ECERC: Evidence-Cause Attention Network for Multi-Modal Emotion Recognition in Conversation",
+          "best_chunk_id": "ff4320f9f07532141baa3582ea97c1a9e659907041b5d5012bfc8be47b16a488",
+          "page": 1,
+          "distance": 8.53115463256836,
+          "chunk_rank": 6
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 0.0,
+        "mrr_at_5": 0.0,
+        "ndcg_at_5": 0.0
+      },
+      "retrieval_latency_ms": 12.461582897230983
+    },
+    {
+      "query_id": "exact_emotiontalk",
+      "query": "EmotionTalk: An Interactive Chinese Multimodal Emotion Dataset With Rich Annotations",
+      "language": "en",
+      "category": "exact_lookup",
+      "relevant_paper_ids": [
+        "2026.findings-acl.440"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "Exact paper-title lookup.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2026.findings-acl.440",
+          "title": "EmotionTalk: An Interactive Chinese Multimodal Emotion Dataset With Rich Annotations",
+          "best_chunk_id": "e15edd2edf9d7853762036e4df7740ccc2948ad56b1c2a86bce899e1b139b557",
+          "page": 2,
+          "distance": 6.843644142150879,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2026.findings-acl.1484",
+          "title": "CogEmp:A Cognitive Empathy-Oriented Dialogue System for Structured Psychological Counseling",
+          "best_chunk_id": "98355800505c6a6382a5c380a9282490ec0c41f006095706facc6df5518ae9a0",
+          "page": 11,
+          "distance": 8.711884498596191,
+          "chunk_rank": 5
+        },
+        {
+          "rank": 3,
+          "paper_id": "2025.findings-emnlp.332",
+          "title": "Multimodal Emotion Recognition in Conversations: A Survey of Methods, Trends, Challenges and Prospects",
+          "best_chunk_id": "9aa1c80794d59153d593914ff66d5ec20162f040b381c9ac05091cd3e1001935",
+          "page": 17,
+          "distance": 9.671062469482422,
+          "chunk_rank": 6
+        },
+        {
+          "rank": 4,
+          "paper_id": "2026.acl-long.886",
+          "title": "Causal-ESC: Reliable Policy Learning for Emotional Support Conversation via Causal Inference",
+          "best_chunk_id": "b7f91c3ea568c3064f535093a4ef8c7050e7800dea99f0bba69de254dfcfa707",
+          "page": 12,
+          "distance": 9.720551490783691,
+          "chunk_rank": 7
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.findings-acl.1018",
+          "title": "EmoMM: Benchmarking and Steering MLLM for Multimodal Emotion Recognition under Conflict and Missingness",
+          "best_chunk_id": "5a8734dc42152ea6ec4fead0b87137bbfd9d1e94a04f5bf5570ab84790a854f5",
+          "page": 3,
+          "distance": 9.837926864624023,
+          "chunk_rank": 8
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 1.0,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 1.0
+      },
+      "retrieval_latency_ms": 15.559666091576219
+    },
+    {
+      "query_id": "exact_ecerc",
+      "query": "2025.acl-long.102 ECERC Evidence-Cause Attention Network",
+      "language": "en",
+      "category": "exact_lookup",
+      "relevant_paper_ids": [
+        "2025.acl-long.102"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "Exact Anthology ID and framework-name lookup.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2025.ijcnlp-long.49",
+          "title": "Unveiling Empathic Triggers in Online Interactions via Empathy Cause Identification",
+          "best_chunk_id": "7c3cfc0bd2c77444f5d205cab0e212cc6a58f25a6941bd50390a23e04b0b46b7",
+          "page": 5,
+          "distance": 7.820527076721191,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2025.acl-long.102",
+          "title": "ECERC: Evidence-Cause Attention Network for Multi-Modal Emotion Recognition in Conversation",
+          "best_chunk_id": "66dc674885c2a7ac595cc90a55cb43a391daf19b45957bce06670abfaf0181ad",
+          "page": 2,
+          "distance": 8.95499324798584,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2026.findings-acl.1018",
+          "title": "EmoMM: Benchmarking and Steering MLLM for Multimodal Emotion Recognition under Conflict and Missingness",
+          "best_chunk_id": "e6422ab2d875be2a55fce334b51fe4bd3163d122b0735b277bdb2dba3d2f826a",
+          "page": 5,
+          "distance": 10.613272666931152,
+          "chunk_rank": 5
+        },
+        {
+          "rank": 4,
+          "paper_id": "2025.nlpai4health-main.1",
+          "title": "Enhancing Patient-Centric Healthcare Communication Through Multimodal Emotion Recognition: A Transformer-Based Framework for Clinical Decision Support",
+          "best_chunk_id": "ed95b5f7ebe4703b8f1ba5b9e3bc9ac4e883c07eddf1142b0c3f1aec1544f7b1",
+          "page": 6,
+          "distance": 10.666977882385254,
+          "chunk_rank": 6
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.findings-eacl.212",
+          "title": "Emotion Recognition in Multi-Speaker Conversations through Speaker Identification, Knowledge Distillation, and Hierarchical Fusion",
+          "best_chunk_id": "3c252d0910f87cb5246092493e37bdab6b9e4cfaad9782d3e2b502c702582498",
+          "page": 1,
+          "distance": 10.904897689819336,
+          "chunk_rank": 10
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 1.0,
+        "mrr_at_5": 0.5,
+        "ndcg_at_5": 0.6309297535714575
+      },
+      "retrieval_latency_ms": 15.844875015318394
+    },
+    {
+      "query_id": "support_retrieval",
+      "query": "Retrieval and memory methods for emotionally appropriate support dialogue",
+      "language": "en",
+      "category": "multiple_relevant",
+      "relevant_paper_ids": [
+        "2026.findings-acl.2080",
+        "2026.acl-long.860",
+        "2026.findings-acl.844"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "The abstracts cover need-aware memory retrieval, emotion-similarity retrieval, and appraisal-guided retrieval for support.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2026.findings-acl.2080",
+          "title": "ENPMR-Bench: Benchmarking Proactive Memory Retrieval for Emotional Support Agents",
+          "best_chunk_id": "c69f9ba1c8d7e363b23f1c37563c4e9add3ffe68d18f0dec30163f761c8fe65e",
+          "page": 5,
+          "distance": 9.202977180480957,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2026.findings-acl.1",
+          "title": "I Don’t Need Solution. I Need Emotional Support : Empathetic LLMs based on Emotional Validation",
+          "best_chunk_id": "eab10fb1082394cd77d1de113a1d4102abbfd73061d2d04f75d57d200063e362",
+          "page": 2,
+          "distance": 10.39173698425293,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2026.acl-long.860",
+          "title": "REG: Retrieval via Emotion Similarity for Guiding Empathetic Dialogue Generation",
+          "best_chunk_id": "fbc2d4a33231246341a0fd8e6b8fcb219a7a8fe4ad9fb35ccdd7cbebf342e047",
+          "page": 2,
+          "distance": 10.473896026611328,
+          "chunk_rank": 3
+        },
+        {
+          "rank": 4,
+          "paper_id": "2025.acl-long.1148",
+          "title": "CoE: A Clue of Emotion Framework for Emotion Recognition in Conversations",
+          "best_chunk_id": "3c279fcd5fbac33b682df7f34471816635052bfa617bd26d291a8e880915413c",
+          "page": 1,
+          "distance": 10.709321022033691,
+          "chunk_rank": 6
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.acl-long.321",
+          "title": "STRIDE-ED: A Strategy-Grounded Stepwise Reasoning Framework for Empathetic Dialogue Systems",
+          "best_chunk_id": "27ee7bb6ce5e0f0d2a4f8cc27236b2e692ced7e6a44c6df11a510079d5b6f8c5",
+          "page": 3,
+          "distance": 10.810215950012207,
+          "chunk_rank": 7
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 0.6666666666666666,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 0.7039180890341347
+      },
+      "retrieval_latency_ms": 14.671167125925422
+    },
+    {
+      "query_id": "personalized_support",
+      "query": "How can emotional support be personalized to user preferences, personality, and internal state?",
+      "language": "en",
+      "category": "multiple_relevant",
+      "relevant_paper_ids": [
+        "2025.findings-emnlp.1024",
+        "2026.acl-long.53",
+        "2025.coling-main.598"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "The abstracts address preference alignment, simulated user internal worlds, and personality-aware empathetic generation.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2025.findings-emnlp.1024",
+          "title": "From Generic Empathy to Personalized Emotional Support: A Self-Evolution Framework for User Preference Alignment",
+          "best_chunk_id": "864935790841fa53ec41db45088cb25ecfa949cf5b92eef77507a8cf01298b36",
+          "page": 2,
+          "distance": 8.939346313476562,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2026.acl-long.53",
+          "title": "EmoHarbor: Evaluating Personalized Emotional Support by Simulating the User’s Internal World",
+          "best_chunk_id": "14342d7b7184b441d49c1e844ef227c8a6b8cc4ffef3fba9368535b269426514",
+          "page": 22,
+          "distance": 9.510220527648926,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2026.findings-acl.2080",
+          "title": "ENPMR-Bench: Benchmarking Proactive Memory Retrieval for Emotional Support Agents",
+          "best_chunk_id": "910c526b6a1def83b0190f260ab5b3a35ae5384895667ae76a7c2b22ffbfa546",
+          "page": 21,
+          "distance": 11.208986282348633,
+          "chunk_rank": 9
+        },
+        {
+          "rank": 4,
+          "paper_id": "2025.acl-long.1395",
+          "title": "Dialogue Systems for Emotional Support via Value Reinforcement",
+          "best_chunk_id": "e5465243811fce419423a46193241b05c0465f6b84647ab9cefb22aa7b1a28ff",
+          "page": 10,
+          "distance": 11.237974166870117,
+          "chunk_rank": 10
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.findings-acl.1484",
+          "title": "CogEmp:A Cognitive Empathy-Oriented Dialogue System for Structured Psychological Counseling",
+          "best_chunk_id": "b793ce2d83b4f02cb05c3cf6a81c26b5e4d02e60bfcc9687dbbfde12d4b8c77b",
+          "page": 2,
+          "distance": 11.475179672241211,
+          "chunk_rank": 12
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 0.6666666666666666,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 0.7653606369886217
+      },
+      "retrieval_latency_ms": 14.837583992630243
+    },
+    {
+      "query_id": "omnimodal_empathy_benchmark",
+      "query": "A benchmark for measuring empathy in audio or omni-modal large models",
+      "language": "en",
+      "category": "english_topic",
+      "relevant_paper_ids": [
+        "2026.findings-acl.1813"
+      ],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "AEQ-Bench explicitly evaluates empathy of omni-modal models using audio and text settings.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2026.findings-acl.1813",
+          "title": "AEQ-Bench: Measuring Empathy of Omni-Modal Large Models",
+          "best_chunk_id": "0ba435170c2051a97c6bc8af491ac3ab39cc405fe851461cdc50263f061ede8c",
+          "page": 1,
+          "distance": 7.982074737548828,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2025.acl-long.1235",
+          "title": "ReflectDiffu: Reflect between Emotion-intent Contagion and Mimicry for Empathetic Response Generation via a RL-Diffusion Framework",
+          "best_chunk_id": "16730f03dc2807d2df5d6a99f6aa10936d8e9b63afe95c34eed7d51190ae3c1d",
+          "page": 13,
+          "distance": 8.773674011230469,
+          "chunk_rank": 6
+        },
+        {
+          "rank": 3,
+          "paper_id": "2026.findings-acl.1983",
+          "title": "Empathy Applicability Modeling for General Health Queries",
+          "best_chunk_id": "6a842b894378d41947a772039f2b8cf07f2209cf204765d121428bace5e58911",
+          "page": 1,
+          "distance": 8.939404487609863,
+          "chunk_rank": 7
+        },
+        {
+          "rank": 4,
+          "paper_id": "2026.lrec-1.210",
+          "title": "Empathy in Greek Exam-Related Support Conversations: A Comparative Evaluation of LLM Responses",
+          "best_chunk_id": "cf5c8e564cacb300b7d6f6d1bd2c839b47e857daf039ce7ef5d4d9e53017b938",
+          "page": 7,
+          "distance": 9.065540313720703,
+          "chunk_rank": 9
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.findings-acl.846",
+          "title": "FreezeEmpath: Efficient Training for Empathetic Spoken Chatbots with Frozen LLMs",
+          "best_chunk_id": "504e3c95962514a0b3cb8801a133291eaee3e65a79f69e297c5f990c6f6ef07a",
+          "page": 7,
+          "distance": 9.28593635559082,
+          "chunk_rank": 11
+        }
+      ],
+      "metrics": {
+        "recall_at_5": 1.0,
+        "mrr_at_5": 1.0,
+        "ndcg_at_5": 1.0
+      },
+      "retrieval_latency_ms": 14.544541016221046
+    },
+    {
+      "query_id": "out_of_scope_quantum",
+      "query": "How does surface-code quantum error correction improve superconducting qubit fault tolerance?",
+      "language": "en",
+      "category": "unanswerable",
+      "relevant_paper_ids": [],
+      "judgment_basis": "manually_curated_from_titles_and_abstracts",
+      "judgment_note": "No manifest title or abstract concerns quantum computing or error correction.",
+      "rankings": [
+        {
+          "rank": 1,
+          "paper_id": "2025.acl-long.1408",
+          "title": "Towards Better Value Principles for Large Language Model Alignment: A Systematic Evaluation and Enhancement",
+          "best_chunk_id": "a8c136d1430b44799dbc236c2d74d732088fdd3fdf2da977fd4f5f038de64b6e",
+          "page": 9,
+          "distance": 17.114057540893555,
+          "chunk_rank": 1
+        },
+        {
+          "rank": 2,
+          "paper_id": "2026.acl-long.806",
+          "title": "Cognitive Policy-Driven LLM for Diagnosis and Intervention of Cognitive Distortions in Emotional Support Conversation",
+          "best_chunk_id": "24177cea90bf5cfd6746a5071c1b83b5ca923873403863594fd0abedd78bbeb9",
+          "page": 14,
+          "distance": 18.016517639160156,
+          "chunk_rank": 2
+        },
+        {
+          "rank": 3,
+          "paper_id": "2026.findings-acl.813",
+          "title": "CaM-HG: Causal-Enhanced MoE and Hypergraphs Network for Incomplete Multimodal Emotion Recognition in Conversations",
+          "best_chunk_id": "2532bc1e6fb6bd3776bf7e180c0f6ce10b62d44997761455a79a05d1d3844eb7",
+          "page": 4,
+          "distance": 18.169822692871094,
+          "chunk_rank": 3
+        },
+        {
+          "rank": 4,
+          "paper_id": "2025.ijcnlp-long.152",
+          "title": "Adaptive Collaborative Labeling with MLLMs for Low-Resource Multimodal Emotion Recognition",
+          "best_chunk_id": "8cdce5b0e5a87941477c9c91dadfcdc48238f3c91fdfbef78b9277a476c8e03c",
+          "page": 17,
+          "distance": 18.5374698638916,
+          "chunk_rank": 4
+        },
+        {
+          "rank": 5,
+          "paper_id": "2026.findings-acl.2080",
+          "title": "ENPMR-Bench: Benchmarking Proactive Memory Retrieval for Emotional Support Agents",
+          "best_chunk_id": "40d08d1866f97fe7b5fde9bf1d7ce377c25d584a715a150164bf839fb0da1692",
+          "page": 8,
+          "distance": 18.79854393005371,
+          "chunk_rank": 6
+        }
+      ],
+      "metrics": {
+        "recall_at_5": null,
+        "mrr_at_5": null,
+        "ndcg_at_5": null
+      },
+      "retrieval_latency_ms": 16.56762487255037
+    }
+  ]
+}

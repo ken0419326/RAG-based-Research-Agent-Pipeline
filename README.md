@@ -1,118 +1,241 @@
-# Build-Your-Personal-RAG
+# RAG-based Research Agent Pipeline
 
-## 1. 專案簡介
-* **知識主題**：本專案聚焦於「ACL Anthology 2025–2026 年論文中關於同理心 (Empathy)、情緒理解與價值對齊 (Value Alignment) 的研究」。
-* **選擇理由**：隨著大型語言模型 (LLM) 的普及，如何讓模型展現人類般的同理心並符合人類價值觀（Value Alignment）是當前 NLP 領域的核心課題。
-* **資料來源**：固定 corpus manifest 定義 50 份從 ACL Anthology 選出的論文，格式為 PDF。
-* **技術選型**：
-    * **LLM 接口**：可選擇使用 OpenAI SDK 介接使用者設定的 OpenAI-compatible provider。
-    * **向量資料庫**：ChromaDB (Persistent Mode)。
-    * **嵌入模型**：paraphrase-multilingual-MiniLM-L12-v2。
+這是一個課堂專案，示範如何建立可重現、可測試且具來源追蹤能力的本機 RAG pipeline。專案處理 ACL Anthology 中與 empathy、emotion recognition、emotional support 及 value alignment 有關的固定論文集合，支援中英文 semantic retrieval，並可選擇透過 OpenAI-compatible provider 產生帶來源 ID 的回答與 Markdown research report。
 
-## 2. 系統架構說明
+本專案定位是小型本機應用與軟體工程作品，不是 production-ready service，也不提供回答正確性保證。
+
+## 功能範圍
+
+- 以固定規則取得 ACL Anthology 2025–2026 論文候選並下載 canonical 50-paper corpus。
+- 使用 `pypdf` 逐頁擷取 PDF 全文，以 750-character chunks 和 100-character overlap 建立 deterministic chunks。
+- 使用 `paraphrase-multilingual-MiniLM-L12-v2` 建立本機 ChromaDB index。
+- 在沒有 LLM credential 的情況下執行 retrieval-only 中英文查詢。
+- 選擇性呼叫任意 OpenAI-compatible provider，並驗證回答中的 `[S#]` 是否存在於當次 source map。
+- 產生含 index provenance、checkpoint及程式化source table的Markdown report。
+- 以12題人工整理的小型evaluation set測量paper-level Recall@5、MRR@5與nDCG@5。
+
+## Architecture and data flow
+
 ```mermaid
-graph LR
-    A[data/raw PDF] --> B[data_update.py]
-    B --> C{Page-local 750/100\nCharacter Chunking}
-    C --> D[Sentence-Transformer\nMiniLM-L12]
-    D --> E[(ChromaDB)]
-    E --> F[RetrievalService]
-    F --> G[rag_query.py]
-    F --> H[skill_builder.py]
-    G --> I[OpenAI-compatible LLM optional]
-    H --> I
-    H --> J[Markdown report]
+flowchart LR
+    A[ACL Anthology catalog] --> B[downloader.py]
+    B --> C[corpus/manifest.json]
+    B --> D[data/raw PDF + JSON]
+    C --> E[data_update.py --prepare-only]
+    D --> E
+    E --> F[data/processed/chunks.jsonl]
+    F --> G[data_update.py --build-index]
+    C --> G
+    G --> H[(New validated Chroma collection)]
+    H --> I[active_index.json]
+    I --> J[RetrievalService]
+    J --> K[rag_query.py retrieval-only]
+    J --> L[GenerationService optional]
+    L --> M[Source-aware answer]
+    J --> N[skill_builder.py]
+    L --> N
+    N --> O[Checkpoint + Markdown report]
+    J --> P[eval.run_retrieval]
+    P --> Q[eval/results/release.json]
 ```
 
-## 3. 設計決策說明 (Design Decisions)
+重要模組：
 
-* **Chunking 策略**：
-    * PDF 逐頁獨立切分，不讓 chunk 跨越 page boundary。
-    * **設定參數**：chunk_size=750, chunk_overlap=100，單位皆為 characters。
-    * **決策理由**：固定 character windows 與 overlap 可產生可重現的 chunk boundaries。
-* **Embedding 模型選擇**：
-    * 選用 paraphrase-multilingual-MiniLM-L12-v2。
-    * **決策理由**：此多語系模型在語意對齊上表現優異，且體積適中，適合本地 CPU 環境。
-* **Vector DB 選型**：
-    * 選擇 **ChromaDB**。
-    * **決策理由**：提供嵌入式存儲，無需透過 Docker 啟動服務，複現性最高且適合小型研究專案。
-* **Retrieval 策略**：
-    * **Top-k 設定**：預設為 3。
-    * **決策理由**：在提供足夠脈絡與控制模型回應時間（Latency）之間取得最佳平衡，避免過長的 Context 導致推論超時。
-* **Prompt Engineering**：
-    * **設計邏輯**：強制要求模型根據參考資料回答，並列出引用來源。若資料不足則必須誠實回答「不知道」。
-    * **決策理由**：有效抑制 LLM 產生幻覺（Hallucination）。
-* **Idempotency 設計**：
-    * **實作方式**：`--build-index` 每次建立新的 Chroma collection，完整驗證後才 atomic 更新 active pointer。
-    * **決策理由**：build 或 validation 失敗時保留先前 active collection；舊 validated collections 不會自動刪除。
+| File | Responsibility |
+|---|---|
+| `config.py` | Typed、side-effect-free configuration與command-specific preflight |
+| `corpus.py` | Corpus keyword matching、ranking與manifest models |
+| `downloader.py` | ACL catalog讀取、安全PDF下載與manifest更新 |
+| `documents.py` | Manifest-driven PDF extraction及deterministic page-local chunking |
+| `data_update.py` | `--prepare-only`及safe full index rebuild entry point |
+| `indexing.py` | Batched embedding、staging collection validation及active pointer更新 |
+| `retrieval.py` | Active index validation與ordered retrieval results |
+| `generation.py` | Optional OpenAI-compatible generation與citation-ID validation |
+| `skill_builder.py` / `reporting.py` | Checkpointed report orchestration、atomic output及verified source table |
+| `eval/run_retrieval.py` | Paper-level retrieval evaluation與machine-readable results |
 
-## 4. 環境設定與執行方式
+## Requirements and installation
 
-### 4-1. Python 版本與虛擬環境
-* `pyproject.toml` 限定 **Python 3.11–3.12**；GitHub Actions matrix會在兩個版本分別執行鎖定安裝、Ruff與offline tests。Python 3.13不在目前範圍內；workflow的實際GitHub結果需在push後確認。
+- Python 3.11或3.12。Python 3.13未驗證，也不在目前支援範圍。
+- [`uv`](https://docs.astral.sh/uv/)。
+- Corpus acquisition需要連線到ACL Anthology；首次index build可能需要下載embedding model。
+- Retrieval-only不需要LLM credential。
+- Answer及report generation才需要使用者提供OpenAI-compatible endpoint與key。
 
 ```bash
-# ① 確認 Python 與 uv 版本
-python3 --version
-uv --version
-
-# ② 依 uv.lock 安裝 runtime 與 development dependencies
+git clone <repository-url>
+cd RAG-based-Research-Agent-Pipeline
 uv sync --locked --all-groups
-
-# ③ 建立本機設定檔（不得提交真實 API key）
 cp .env.example .env
 ```
 
-Corpus acquisition、ingestion、indexing 與 retrieval-only 查詢不需要 LLM credentials。目前的回答與報告生成則需要在 `.env` 設定 provider-neutral 的 `LLM_BASE_URL`、`LLM_API_KEY` 與 `LLM_MODEL`。Groq 可作為 OpenAI-compatible provider 的範例，但 application logic 不依賴 Groq；endpoint、model availability、free tier 與 rate limits 可能變動，使用前請查閱 provider 的最新官方文件。
+所有relative paths均以project root解析。Runtime PDFs、chunks、ChromaDB、model caches、checkpoints、ordinary reports與`.env`皆由Git忽略。
 
-所有相對路徑均以 project root 解析，而不是呼叫命令時的 current working directory。
+## Configuration
 
-CI只執行`uv sync --locked --all-groups`、Ruff lint/format checks與`pytest`。Tests使用fake或temporary dependencies，不需要`.env`、API secrets、ACL downloads、embedding model downloads、runtime services或real Chroma index。
+Provider-neutral LLM設定如下；不執行generation時可全部留空：
 
-### 4-2. Vector DB 啟動
-本專案使用 **ChromaDB (Embedded Mode)**，無需啟動 Docker 容器。資料將儲存於專案目錄下的 chroma_db/。
+```env
+LLM_BASE_URL=
+LLM_API_KEY=
+LLM_MODEL=
+```
 
-### 4-3. 完整執行流程
+Groq只是OpenAI-compatible設定範例，不是application logic的硬編碼依賴：
+
+```env
+LLM_BASE_URL=https://api.groq.com/openai/v1
+LLM_API_KEY=
+LLM_MODEL=openai/gpt-oss-20b
+```
+
+Provider availability、free tier、model名稱、endpoint與rate limits都可能改變；使用前應確認provider目前的官方文件。不要commit真實API key。CI不讀取`.env`，也不接收provider credentials。
+
+可用的path/model overrides列於`.env.example`，包括`RAW_DATA_DIR`、`PROCESSED_DATA_DIR`、`CORPUS_MANIFEST_PATH`、`ACL_ANTHOLOGY_REPO_DIR`、`CHROMA_PERSIST_DIR`、`CHROMA_COLLECTION`、`EMBEDDING_MODEL`與`REPORT_CHECKPOINT_PATH`。
+
+## Corpus acquisition
+
+Canonical corpus由tracked `corpus/manifest.json`定義，共50篇：2025年21篇、2026年29篇，來源不限定單一venue。
+
+首次selection會：
+
+1. 僅保留`2025 <= paper.year <= 2026`。
+2. 對normalized title與abstract比對明確keyword phrases。
+3. 使用`2 × title keyword matches + abstract keyword matches`計分。
+4. 依score descending、year descending、Anthology paper ID ascending排序。
+5. 去除重複paper IDs並選取前50篇。若不足50篇則停止，不會放寬keywords。
+
+Standalone `value`、`alignment`與`sentiment`不是selection keywords。Manifest建立後，其固定paper IDs不會因catalog新增項目而被自動替換。
+
 ```bash
-# ④ 下載原始資料
 uv run python downloader.py
+```
 
-# ⑤ 解析 manifest 中的 PDF 並產生 structured chunks（不載入 embedding/ChromaDB）
+Downloader設定HTTP timeout、檢查successful status與`%PDF-`signature，並以temporary file加atomic replace寫入。既有valid PDF不會被覆寫。輸出中的`selected`、`downloaded`、`already existing`及`failed`是分開計數；failed項目不會被算成成功PDF。
+
+Manifest是paper identity的canonical source。Ignored JSON sidecar保存經paper ID核對的abstract，但不是identity authority。
+
+## PDF preparation
+
+Initial release只支援manifest所列PDF及其associated JSON metadata，不支援standalone Markdown或TXT ingestion。
+
+```bash
 uv run python data_update.py --prepare-only
+```
 
-# ⑥ 建立並驗證新的 Chroma collection，成功後切換 active pointer
+此命令：
+
+- 只處理fixed manifest中的50篇PDF。
+- 使用`pypdf`逐頁擷取全文，不做複雜References移除或OCR。
+- 每頁獨立使用`chunk_size = 750`、`chunk_overlap = 100`；單位是characters，不是tokens。
+- 保存paper ID、title、year、venue、URL、page、chunk index、PDF hash與chunk hash。
+- 將deterministic chunks atomic寫入ignored `data/processed/chunks.jsonl`。
+- 不載入embedding model、ChromaDB或LLM client。
+
+目前release artifacts驗證的結果為50篇parsed papers、866 pages及5,398 chunks。
+
+## Safe full index rebuild
+
+```bash
 uv run python data_update.py --build-index
+```
 
-# ⑦ Retrieval-only 查詢（不需要 LLM_*；可加 --json 取得 JSON）
-uv run python rag_query.py --query "your question" --top-k 5 --retrieval-only
+此命令只讀取`data/processed/chunks.jsonl`，以batch方式產生embeddings並建立新的Chroma collection，不會原地修改active collection。新collection必須通過chunk count、unique IDs、50-paper coverage、embedding dimension與sample read-back驗證，之後才會atomic更新ignored `index_manifest.json`及`active_index.json`。失敗時既有active pointer不變；舊validated collections不會自動刪除。
 
-# ⑧ 產生帶有 validated source IDs 的回答（需要 LLM_* 設定）
-uv run python rag_query.py --query "your question" --top-k 5
+目前active index含50篇、5,398 chunks及384-dimensional embeddings。現有index manifest沒有保存build duration，因此release results不宣稱該數值。
 
-# ⑨ 生成 checkpointed Markdown research report（需要 LLM_* 設定）
+## Retrieval-only
+
+```bash
+uv run python rag_query.py --query "How can multimodal dialogue emotion recognition be improved?" --top-k 5 --retrieval-only
+
+uv run python rag_query.py --query "大型語言模型如何進行價值對齊？" --top-k 5 --retrieval-only --json
+```
+
+Retrieval會驗證active pointer、index manifest、collection identity、count、embedding model及dimension，而且只呼叫`get_collection()`，不會靜默建立空collection。結果保持Chroma順序，包含rank、`[S#]`、distance、chunk ID、paper metadata、page、URL與passage text。Distance不是accuracy或calibrated probability。
+
+## Optional answer generation
+
+設定`LLM_*`後執行：
+
+```bash
+uv run python rag_query.py --query "How can multimodal dialogue emotion recognition be improved?" --top-k 5
+```
+
+Generation prompt將retrieved documents視為untrusted evidence，要求模型只依context回答、使用提供的`[S#]`、忽略document內的instructions，並在資料不足時明確說明。程式會列出valid及invalid source IDs，只從verified retrieval metadata回傳cited source資料。
+
+Citation-ID validation只能確認某個ID存在於當次source map；它不能證明claim受到該passage支持，也不能證明回答事實正確。Conversation history只保留在目前process，retrieval仍使用current query，不做query rewriting或persistent history。
+
+## Report generation
+
+```bash
 uv run python skill_builder.py --output reports/research_report.md
 ```
 
-`--prepare-only` 僅處理 fixed manifest 的 50 份 PDF，逐頁使用 `pypdf` 擷取全文並將 provenance-rich chunks 原子寫入 Git-ignored 的 `data/processed/chunks.jsonl`。摘要輸出會分別列出 selected、parsed、failed、empty、pages 與 chunks；此命令不需要 embedding model、ChromaDB 或 LLM credentials。
+Report workflow保留四個固定research questions，共用retrieval及generation services。Checkpoint包含schema version、completed question IDs及active index identity；corrupt或identity mismatch的checkpoint會被拒絕。Checkpoint與final Markdown均以temporary file加replace寫入。
 
-`--build-index` 僅以 `data/processed/chunks.jsonl` 為輸入，分批建立新的 Chroma collection。Collection count、paper coverage、embedding dimension 與 sample readability 全部驗證成功後，才會更新 `chroma_db/index_manifest.json` 與 `chroma_db/active_index.json`；失敗不會切換 active collection，舊 collections 也不會自動刪除。此命令使用設定的 embedding model，但不需要 LLM credentials。
+每個section必須至少有一個valid citation且不得含unknown source ID。Source References table只由verified retrieval metadata程式化產生，LLM不能提供table中的paper ID、title或URL。Ordinary reports預設寫入ignored `reports/`。
 
-`--retrieval-only` 只會開啟 active pointer 指定的既有 collection，不會建立空 collection 或初始化 LLM client。結果依 Chroma 回傳順序列出 `[S1]`、`[S2]` 等 response-level source IDs，以及明確標為 distance 的距離值、paper/chunk provenance 與 passage text；distance 不是 accuracy。加上 `--json` 可輸出相同欄位的 JSON array。
+Tracked範例為[`examples/sample_report.md`](examples/sample_report.md)。它記錄corpus manifest hash、index identity、embedding及generation model；範例中的citation IDs已通過source-map validation，但內容未經獨立claim-level fact checking。
 
-未指定 `--retrieval-only` 時，程式會透過 provider-neutral `LLM_*` 設定呼叫 OpenAI-compatible provider，並要求回答只引用當次 retrieved context 中的 `[S#]`。程式會分別回報 valid 與 invalid source IDs，且只依 verified retrieval metadata 列出 cited papers；ID validation 僅表示引用存在於當次 source map，不代表回答內容必然正確。
+## Tests and CI
 
-`skill_builder.py` 直接共用 retrieval 與 generation services。四個既有 report questions 的 completed IDs 與 active index identity 會原子寫入 ignored checkpoint；stale/corrupt checkpoint 會被拒絕。最終 Markdown 亦以 temporary file 加 replace 寫入，Source References table 由 verified metadata 程式化產生，而非交由 LLM 撰寫。一般報告預設輸出至 ignored 的 `reports/`；既有 tracked `skill.md` 將留到後續文件整理階段處理。
+```bash
+uv run ruff check .
+uv run ruff format --check .
+uv run pytest
+```
 
-#### Downloader 行為
+Automated tests使用mocked/fake HTTP、embedding、vector-store及LLM dependencies。Fake-client tests是software tests，不是answer-quality證據。Tests不需要ACL network、paper/model downloads、real ChromaDB或API key。
 
-`downloader.py` 搜尋 ACL Anthology 中符合 `2025 <= paper.year <= 2026` 的所有 venue，對 normalized title 與 abstract 進行指定 keyword matching。Ranking score 為 `2 × title keyword matches + abstract keyword matches`，再依 score descending、year descending、Anthology paper ID ascending 排序並選出固定 top 50 unique paper IDs。Standalone `value`、`alignment` 與 `sentiment` 不屬於 keywords。
+GitHub Actions在push至`main`及targeting `main`的pull requests上執行Python 3.11與3.12 matrix。每個job只執行locked dependency installation、Ruff及offline `pytest`；首次GitHub結果仍須在workflow push後確認。
 
-Canonical manifest 首次寫入 `corpus/manifest.json` 後即固定 paper IDs；後續執行仍會取得 catalog 並報告 matched count，但不會因 catalog 新增項目而替換 fixed selection。下載的 PDF 與 associated JSON metadata 寫入 `data/raw/` 並由 Git 忽略。若首次選擇時 matched papers 少於 50，命令會停止，不會放寬條件。
+## Retrieval evaluation
 
-執行摘要中的 `selected` 固定表示 manifest 的 50 篇論文；`downloaded` 是本次成功下載且通過 PDF signature 驗證的數量；`already existing` 是無須重複下載的既有有效 PDF；`failed` 是 HTTP 或內容驗證失敗的數量，且不會被計入成功下載。
+Evaluation set位於[`eval/queries.jsonl`](eval/queries.jsonl)，包含12題中文cross-language、English topic、exact lookup、multiple-relevant及out-of-scope queries。Paper-level relevance由manifest titles與sidecar abstracts人工整理，沒有使用LLM judge，也沒有為relevance逐篇獨立閱讀全文。
 
-## 5. 資料來源聲明 (Data Sources Statement)
+Runner先取得20個ordered chunk candidates，再按paper第一次出現的位置deduplicate，評估前5個unique papers：
 
-| 來源名稱 | 類型 | 授權 / 合規依據 | 數量 |
-| :--- | :--- | :--- | :--- |
-| ACL Anthology  | PDF | CC BY 4.0 | 固定 manifest 50 篇 |
+```bash
+uv run python -m eval.run_retrieval --output eval/results/release.json
+```
+
+目前active index的實際結果：
+
+| Metric | Result |
+|---|---:|
+| Recall@5 | 0.636364 |
+| MRR@5 | 0.613636 |
+| nDCG@5 | 0.565088 |
+
+Aggregate metrics只計算11題具有non-empty gold relevance的queries。Out-of-scope query仍保存實際rankings，但三個metrics為`null`且不納入macro average。完整per-query rankings、distances、latency、runtime、corpus/index identities及ingestion statistics位於tracked [`eval/results/release.json`](eval/results/release.json)；不包含full chunks或secrets。
+
+這些數字只描述此小型人工evaluation set與特定active index，不能外推為一般RAG品質、groundedness或generation品質。
+
+## Reproducibility and tracked artifacts
+
+應追蹤：
+
+- `corpus/manifest.json`
+- `eval/queries.jsonl`
+- `eval/results/release.json`
+- `examples/sample_report.md`
+- Source、tests、`pyproject.toml`及`uv.lock`
+
+不應追蹤：`.env`、PDFs、sidecar JSON、processed JSONL、ChromaDB、model cache、checkpoints及ordinary reports。
+
+## Limitations
+
+- Corpus只有50篇，受2025–2026、keyword policy及固定selection影響；不代表ACL Anthology完整研究版圖。
+- Relevance judgments只根據titles/abstracts人工整理，規模小且沒有independent assessors。
+- `pypdf` extraction不支援OCR、layout-aware parsing、table reconstruction或scanned PDFs。
+- Character chunking可能切斷語意；目前沒有token-aware chunking實驗。
+- Retrieval只有dense embeddings，沒有hybrid search、reranking或query rewriting。
+- Out-of-scope query仍會得到nearest-neighbor passages；目前沒有abstention threshold。
+- Citation validation只檢查source ID membership，不測量claim-level correctness或groundedness。
+- Optional generation依賴外部provider，其availability、model behavior、rate limits與價格不可由本repository保證。
+- 專案沒有HTTP API、authentication、多使用者隔離、persistent conversation history、cloud deployment或production monitoring。
+
+## Future Work
+
+初始release之外可能考慮：incremental indexing、hybrid retrieval、reranking、token-aware chunking、OCR/layout-aware parsing、persistent multi-user history、FastAPI、Docker、authentication、cloud deployment、hosted vector databases、streaming及明確標示為optional experiment的LLM-as-judge。這些項目目前均未實作。

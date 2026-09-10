@@ -90,6 +90,7 @@ def test_skill_builder_writes_checkpoint_and_programmatic_source_table(tmp_path)
         active_index = SimpleNamespace(
             index_identity="a" * 64,
             embedding_model="test-embedding",
+            corpus_manifest_sha256="b" * 64,
         )
         embedder = object()
         client = object()

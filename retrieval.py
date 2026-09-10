@@ -39,6 +39,8 @@ class ActiveIndex:
     index_identity: str
     embedding_model: str
     embedding_dimension: int
+    corpus_manifest_sha256: str
+    chunks_jsonl_sha256: str
     paper_count: int
     chunk_count: int
 
@@ -121,6 +123,8 @@ def load_active_index(config: AppConfig) -> ActiveIndex:
         index_identity=manifest["index_identity"],
         embedding_model=manifest["embedding_model"],
         embedding_dimension=manifest["embedding_dimension"],
+        corpus_manifest_sha256=manifest["corpus_manifest_sha256"],
+        chunks_jsonl_sha256=manifest["chunks_jsonl_sha256"],
         paper_count=manifest["paper_count"],
         chunk_count=manifest["chunk_count"],
     )
