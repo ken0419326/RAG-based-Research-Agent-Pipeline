@@ -49,7 +49,7 @@ graph LR
 ## 4. 環境設定與執行方式
 
 ### 4-1. Python 版本與虛擬環境
-* `pyproject.toml` 目前限定 **Python 3.11–3.12**；正式支援聲明仍需在後續 CI matrix 完成驗證。Python 3.13 不在目前範圍內。
+* `pyproject.toml` 限定 **Python 3.11–3.12**；GitHub Actions matrix會在兩個版本分別執行鎖定安裝、Ruff與offline tests。Python 3.13不在目前範圍內；workflow的實際GitHub結果需在push後確認。
 
 ```bash
 # ① 確認 Python 與 uv 版本
@@ -66,6 +66,8 @@ cp .env.example .env
 Corpus acquisition、ingestion、indexing 與 retrieval-only 查詢不需要 LLM credentials。目前的回答與報告生成則需要在 `.env` 設定 provider-neutral 的 `LLM_BASE_URL`、`LLM_API_KEY` 與 `LLM_MODEL`。Groq 可作為 OpenAI-compatible provider 的範例，但 application logic 不依賴 Groq；endpoint、model availability、free tier 與 rate limits 可能變動，使用前請查閱 provider 的最新官方文件。
 
 所有相對路徑均以 project root 解析，而不是呼叫命令時的 current working directory。
+
+CI只執行`uv sync --locked --all-groups`、Ruff lint/format checks與`pytest`。Tests使用fake或temporary dependencies，不需要`.env`、API secrets、ACL downloads、embedding model downloads、runtime services或real Chroma index。
 
 ### 4-2. Vector DB 啟動
 本專案使用 **ChromaDB (Embedded Mode)**，無需啟動 Docker 容器。資料將儲存於專案目錄下的 chroma_db/。
