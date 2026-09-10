@@ -7,6 +7,7 @@ from contextlib import suppress
 from typing import Any
 
 from config import AppConfig, ConfigurationError
+from documents import PREPARED_FILENAME, PreparationError, PreparationSummary, prepare_corpus
 
 
 class DataUpdatePipeline:
@@ -159,15 +160,37 @@ class DataUpdatePipeline:
         self.index_data(rebuild)
         print(f"完成！目前 DB 片段總數: {self.collection.count()}")
 
+    def prepare_only(self) -> PreparationSummary:
+        """Create structured JSONL chunks without loading embedding or vector clients."""
+        self.config.validate_preparation()
+        return prepare_corpus(
+            manifest_path=self.config.corpus_manifest_path,
+            project_root=self.config.project_root,
+            raw_dir=self.config.raw_dir,
+            output_path=self.config.processed_dir / PREPARED_FILENAME,
+        )
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rebuild", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--rebuild", action="store_true")
+    mode.add_argument("--prepare-only", action="store_true")
     args = parser.parse_args(argv)
     try:
         pipeline = DataUpdatePipeline()
+        if args.prepare_only:
+            summary = pipeline.prepare_only()
+            print(
+                "Preparation summary: "
+                f"selected={summary.selected_papers}, parsed={summary.parsed_papers}, "
+                f"failed={summary.failed_papers}, empty={summary.empty_papers}, "
+                f"pages={summary.total_pages}, chunks={summary.total_chunks}"
+            )
+            print(f"JSONL output: {summary.output_path}")
+            return 1 if summary.failed_papers or summary.empty_papers else 0
         pipeline.run(rebuild=args.rebuild)
-    except ConfigurationError as exc:
+    except (ConfigurationError, PreparationError, ValueError) as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
     return 0

@@ -25,9 +25,9 @@ graph LR
 ## 3. 設計決策說明 (Design Decisions)
 
 * **Chunking 策略**：
-    * 採用 RecursiveCharacterTextSplitter。
-    * **設定參數**：chunk_size=500, chunk_overlap=50。
-    * **決策理由**：500 tokens 約為一個標準段落的大小，能保持語意完整；50 tokens 的重疊則確保段落間的銜接資訊不會遺失。
+    * PDF 逐頁獨立切分，不讓 chunk 跨越 page boundary。
+    * **設定參數**：chunk_size=750, chunk_overlap=100，單位皆為 characters。
+    * **決策理由**：固定 character windows 與 overlap 可產生可重現的 chunk boundaries。
 * **Embedding 模型選擇**：
     * 選用 paraphrase-multilingual-MiniLM-L12-v2。
     * **決策理由**：此多語系模型在語意對齊上表現優異，且體積適中，適合本地 CPU 環境。
@@ -73,15 +73,20 @@ Corpus acquisition、ingestion 與 indexing 不需要 LLM credentials。目前�
 # ④ 下載原始資料
 uv run python downloader.py
 
-# ⑤ 全量重建索引
+# ⑤ 解析 manifest 中的 PDF 並產生 structured chunks（不載入 embedding/ChromaDB）
+uv run python data_update.py --prepare-only
+
+# ⑥ 全量重建索引
 uv run python data_update.py --rebuild
 
-# ⑥ 測試 RAG 問答（需要 LLM_* 設定）
+# ⑦ 測試 RAG 問答（需要 LLM_* 設定）
 uv run python rag_query.py
 
-# ⑦ 生成 Skill 文件（需要 LLM_* 設定）
+# ⑧ 生成 Skill 文件（需要 LLM_* 設定）
 uv run python skill_builder.py --output skill.md
 ```
+
+`--prepare-only` 僅處理 fixed manifest 的 50 份 PDF，逐頁使用 `pypdf` 擷取全文並將 provenance-rich chunks 原子寫入 Git-ignored 的 `data/processed/chunks.jsonl`。摘要輸出會分別列出 selected、parsed、failed、empty、pages 與 chunks；此命令不需要 embedding model、ChromaDB 或 LLM credentials。
 
 #### Downloader 行為
 

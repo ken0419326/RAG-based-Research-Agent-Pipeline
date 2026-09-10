@@ -86,6 +86,19 @@ class AppConfig:
         if not any(supported_files):
             raise ConfigurationError(f"No supported input files found in: {self.raw_dir}")
 
+    def validate_preparation(self) -> None:
+        """Validate manifest-driven PDF preparation without loading external clients."""
+        if not self.corpus_manifest_path.is_file():
+            raise ConfigurationError(
+                f"Corpus manifest does not exist: {self.corpus_manifest_path}. "
+                "Run downloader.py first or set CORPUS_MANIFEST_PATH."
+            )
+        if not self.raw_dir.is_dir():
+            raise ConfigurationError(
+                f"Raw data directory does not exist: {self.raw_dir}. "
+                "Run downloader.py first or set RAW_DATA_DIR."
+            )
+
     def validate_retrieval(self) -> None:
         """Validate retrieval inputs without requiring an LLM or loading a model."""
         if not self.chroma_path.is_dir() or not any(self.chroma_path.iterdir()):
