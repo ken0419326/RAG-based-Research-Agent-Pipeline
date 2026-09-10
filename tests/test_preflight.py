@@ -62,10 +62,8 @@ def test_query_cli_returns_nonzero_for_missing_index(monkeypatch, tmp_path, caps
 
 def test_query_cli_validates_llm_only_after_retrieval_preflight(monkeypatch, tmp_path, capsys):
     (tmp_path / "chroma.sqlite3").write_bytes(b"test fixture")
-    monkeypatch.setenv("CHROMA_PERSIST_DIR", str(tmp_path))
-    monkeypatch.delenv("LLM_BASE_URL", raising=False)
-    monkeypatch.delenv("LLM_API_KEY", raising=False)
-    monkeypatch.delenv("LLM_MODEL", raising=False)
+    config = replace(load_config(), chroma_path=tmp_path)
+    monkeypatch.setattr(rag_query.AppConfig, "load", classmethod(lambda cls: config))
 
     assert rag_query.main(["--query", "test"]) == 2
     error = capsys.readouterr().err

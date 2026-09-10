@@ -26,6 +26,8 @@ class AppConfig:
     project_root: Path
     raw_dir: Path
     processed_dir: Path
+    corpus_manifest_path: Path
+    anthology_repo_dir: Path
     chroma_path: Path
     collection_name: str
     embedding_model: str
@@ -52,6 +54,12 @@ class AppConfig:
             project_root=PROJECT_ROOT,
             raw_dir=_project_path(values.get("RAW_DATA_DIR"), "data/raw"),
             processed_dir=_project_path(values.get("PROCESSED_DATA_DIR"), "data/processed"),
+            corpus_manifest_path=_project_path(
+                values.get("CORPUS_MANIFEST_PATH"), "corpus/manifest.json"
+            ),
+            anthology_repo_dir=_project_path(
+                values.get("ACL_ANTHOLOGY_REPO_DIR"), ".cache/acl-anthology"
+            ),
             chroma_path=_project_path(values.get("CHROMA_PERSIST_DIR"), "chroma_db"),
             collection_name=values.get("CHROMA_COLLECTION", "acl_research"),
             embedding_model=values.get("EMBEDDING_MODEL", "paraphrase-multilingual-MiniLM-L12-v2"),

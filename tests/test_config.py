@@ -17,6 +17,8 @@ def test_default_paths_are_resolved_from_project_root(monkeypatch, tmp_path):
     assert config.project_root == PROJECT_ROOT
     assert config.raw_dir == PROJECT_ROOT / "data/raw"
     assert config.processed_dir == PROJECT_ROOT / "data/processed"
+    assert config.corpus_manifest_path == PROJECT_ROOT / "corpus/manifest.json"
+    assert config.anthology_repo_dir == PROJECT_ROOT / ".cache/acl-anthology"
     assert config.chroma_path == PROJECT_ROOT / "chroma_db"
     assert config.checkpoint_path == PROJECT_ROOT / "temp_insights.json"
 
@@ -26,6 +28,8 @@ def test_relative_overrides_are_project_root_relative():
         {
             "RAW_DATA_DIR": "local/raw",
             "PROCESSED_DATA_DIR": "local/processed",
+            "CORPUS_MANIFEST_PATH": "local/manifest.json",
+            "ACL_ANTHOLOGY_REPO_DIR": "local/anthology",
             "CHROMA_PERSIST_DIR": "local/chroma",
             "REPORT_CHECKPOINT_PATH": "local/checkpoint.json",
         }
@@ -33,6 +37,8 @@ def test_relative_overrides_are_project_root_relative():
 
     assert config.raw_dir == PROJECT_ROOT / "local/raw"
     assert config.processed_dir == PROJECT_ROOT / "local/processed"
+    assert config.corpus_manifest_path == PROJECT_ROOT / "local/manifest.json"
+    assert config.anthology_repo_dir == PROJECT_ROOT / "local/anthology"
     assert config.chroma_path == PROJECT_ROOT / "local/chroma"
     assert config.checkpoint_path == PROJECT_ROOT / "local/checkpoint.json"
 

@@ -1,0 +1,816 @@
+[
+  {
+    "paper_id": "2026.findings-acl.1",
+    "title": "I Don’t Need Solution. I Need Emotional Support : Empathetic LLMs based on Emotional Validation",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.1.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 7,
+    "selection_rank": 1,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.1.pdf",
+    "sha256": "83a862c23523cf69360add9f96ffb65fc6b35d3d796f79542bce142785197aef"
+  },
+  {
+    "paper_id": "2026.acl-long.1875",
+    "title": "Emotion-Wheel-Guided Audio-Referred Text Representation for Multimodal Emotion Recognition in Conversation",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.1875.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 2,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.1875.pdf",
+    "sha256": "6239c4f45e35cd7057135f7fcff7e814ccd5329faa18edcbb12dfd3b4310cdb6"
+  },
+  {
+    "paper_id": "2026.cas-1.9",
+    "title": "Exploring Cross-Modal Interactions in Unimodal and Multimodal Emotion Recognition: An Empirical Study",
+    "year": 2026,
+    "venue": "CAS",
+    "pdf_url": "https://aclanthology.org/2026.cas-1.9.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 3,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.cas-1.9.pdf",
+    "sha256": "36624c4eb52b58b91b90f5019e2cc577b6e3f932066afa1e71f57c5ddd260340"
+  },
+  {
+    "paper_id": "2026.findings-acl.1018",
+    "title": "EmoMM: Benchmarking and Steering MLLM for Multimodal Emotion Recognition under Conflict and Missingness",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.1018.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 4,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.1018.pdf",
+    "sha256": "e0562c53e14369a21f197b52fd602276314b943727ec0309e41f6e2b718bdb5c"
+  },
+  {
+    "paper_id": "2026.findings-acl.41",
+    "title": "CMTD: Cognitive Modeling with Traits and Distortions for Multimodal Emotion Recognition in Conversations",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.41.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 5,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.41.pdf",
+    "sha256": "83b2e58e63ee4f1379857b2649569b7c14c425322caf15dabf658b8209657e40"
+  },
+  {
+    "paper_id": "2026.findings-acl.813",
+    "title": "CaM-HG: Causal-Enhanced MoE and Hypergraphs Network for Incomplete Multimodal Emotion Recognition in Conversations",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.813.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 6,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.813.pdf",
+    "sha256": "f206b4f3c277062e3d440906621e59b1943a0712eccb2ac1ad950ec4c28a62a3"
+  },
+  {
+    "paper_id": "2026.lrec-1.873",
+    "title": "Empathy Speaks in Metaphors: The Empathy-Metaphor Corpus of Figurative Language in Empathetic Text",
+    "year": 2026,
+    "venue": "LREC",
+    "pdf_url": "https://aclanthology.org/2026.lrec-1.873.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 6,
+    "selection_rank": 7,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.lrec-1.873.pdf",
+    "sha256": "dfd56826fab4c3de82502bf6ca16b5e4553f0e3f4008516587760776c65e279b"
+  },
+  {
+    "paper_id": "2025.findings-emnlp.1024",
+    "title": "From Generic Empathy to Personalized Emotional Support: A Self-Evolution Framework for User Preference Alignment",
+    "year": 2025,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2025.findings-emnlp.1024.pdf",
+    "matched_keywords": [
+      "empathy",
+      "emotional support"
+    ],
+    "selection_score": 6,
+    "selection_rank": 8,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.findings-emnlp.1024.pdf",
+    "sha256": "89c6fab66cdd7b1b8a6af638ec30e1c1b8cff308363c0e844d25ac1008f28ddf"
+  },
+  {
+    "paper_id": "2025.findings-emnlp.1059",
+    "title": "GRPO-Guided Modality Selection Enhanced LoRA-Tuned LLMs for Multimodal Emotion Recognition",
+    "year": 2025,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2025.findings-emnlp.1059.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 9,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.findings-emnlp.1059.pdf",
+    "sha256": "b76305970fca8321c45e990cb5943d7b726c74d406818e720bad43d00f2070d7"
+  },
+  {
+    "paper_id": "2025.findings-emnlp.1358",
+    "title": "Are LLMs Empathetic to All? Investigating the Influence of Multi-Demographic Personas on a Model’s Empathy",
+    "year": 2025,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2025.findings-emnlp.1358.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 6,
+    "selection_rank": 10,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.findings-emnlp.1358.pdf",
+    "sha256": "4407787257a8e6ed03ad5063450c1ed7b54738394fd5db2b9703ace447ba94bc"
+  },
+  {
+    "paper_id": "2025.findings-emnlp.332",
+    "title": "Multimodal Emotion Recognition in Conversations: A Survey of Methods, Trends, Challenges and Prospects",
+    "year": 2025,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2025.findings-emnlp.332.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 11,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.findings-emnlp.332.pdf",
+    "sha256": "e345ba9ecee2f3432e94f64156e931e2a39250654efff9e1413be7feaddaf88a"
+  },
+  {
+    "paper_id": "2025.findings-naacl.177",
+    "title": "Multi-Condition Guided Diffusion Network for Multimodal Emotion Recognition in Conversation",
+    "year": 2025,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2025.findings-naacl.177.pdf",
+    "matched_keywords": [
+      "empathetic",
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 12,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.findings-naacl.177.pdf",
+    "sha256": "595ba85418d9504c0546bcf45e94edad5df82333a0905a77839a6653e823d3a0"
+  },
+  {
+    "paper_id": "2025.ijcnlp-long.152",
+    "title": "Adaptive Collaborative Labeling with MLLMs for Low-Resource Multimodal Emotion Recognition",
+    "year": 2025,
+    "venue": "IJCNLP-AACL",
+    "pdf_url": "https://aclanthology.org/2025.ijcnlp-long.152.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 13,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.ijcnlp-long.152.pdf",
+    "sha256": "c598620fd95f40fdd03e97f34142982bda752346234abce90ff7ba09b7bec87e"
+  },
+  {
+    "paper_id": "2025.ijcnlp-long.44",
+    "title": "Multilingual, Not Multicultural: Uncovering the Cultural Empathy Gap in LLMs through a Comparative Empathetic Dialogue Benchmark",
+    "year": 2025,
+    "venue": "IJCNLP-AACL",
+    "pdf_url": "https://aclanthology.org/2025.ijcnlp-long.44.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 6,
+    "selection_rank": 14,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.ijcnlp-long.44.pdf",
+    "sha256": "1d586174bc65e3ff6ca591bce6aef7274820950a233f21e0355415ee10a4846e"
+  },
+  {
+    "paper_id": "2025.ijcnlp-long.49",
+    "title": "Unveiling Empathic Triggers in Online Interactions via Empathy Cause Identification",
+    "year": 2025,
+    "venue": "IJCNLP-AACL",
+    "pdf_url": "https://aclanthology.org/2025.ijcnlp-long.49.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "empathic"
+    ],
+    "selection_score": 6,
+    "selection_rank": 15,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.ijcnlp-long.49.pdf",
+    "sha256": "4f860db7a6072e4a6d14fb0f62dd275103a6bf35755f5e8fe2519bab4e3a9f4a"
+  },
+  {
+    "paper_id": "2025.nlpai4health-main.1",
+    "title": "Enhancing Patient-Centric Healthcare Communication Through Multimodal Emotion Recognition: A Transformer-Based Framework for Clinical Decision Support",
+    "year": 2025,
+    "venue": "NLP-AI4Health",
+    "pdf_url": "https://aclanthology.org/2025.nlpai4health-main.1.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion classification",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 16,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.nlpai4health-main.1.pdf",
+    "sha256": "58147cbb9bd5208fb6fd095556edf7dbb5e84138a08bfffce7f3f79d7b58d073"
+  },
+  {
+    "paper_id": "2025.yrrsds-1.6",
+    "title": "Towards Human-Like Dialogue Systems: Integrating Multimodal Emotion Recognition and Non-Verbal Cue Generation",
+    "year": 2025,
+    "venue": "YRRSDS",
+    "pdf_url": "https://aclanthology.org/2025.yrrsds-1.6.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 6,
+    "selection_rank": 17,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.yrrsds-1.6.pdf",
+    "sha256": "d265cbbccb6ad557ce3fbbf1f4c1aad51ca2d2d719d794a42a1c198ed8b8cf04"
+  },
+  {
+    "paper_id": "2026.acl-long.1141",
+    "title": "Psyche-R1: Towards Reliable Psychological LLMs through Unified Empathy, Expertise, and Reasoning",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.1141.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 5,
+    "selection_rank": 18,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.1141.pdf",
+    "sha256": "a8b67aa07389d1368771977085cad205879958ba707d6aa57a23308d2412a39d"
+  },
+  {
+    "paper_id": "2026.acl-long.53",
+    "title": "EmoHarbor: Evaluating Personalized Emotional Support by Simulating the User’s Internal World",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.53.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 5,
+    "selection_rank": 19,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.53.pdf",
+    "sha256": "6a900ac6575030cbdb4d901a7f615616a56aa8ffff0a4dd1a7122216d222ffde"
+  },
+  {
+    "paper_id": "2026.acl-long.886",
+    "title": "Causal-ESC: Reliable Policy Learning for Emotional Support Conversation via Causal Inference",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.886.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathic",
+      "emotional support"
+    ],
+    "selection_score": 5,
+    "selection_rank": 20,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.886.pdf",
+    "sha256": "a91259c66c19017cf40d8c01a98442af0579a7254460dc728c07b0972f94f4eb"
+  },
+  {
+    "paper_id": "2026.findings-acl.1749",
+    "title": "Value Alignment Tax: Measuring Value Trade-offs in LLM Alignment",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.1749.pdf",
+    "matched_keywords": [
+      "value alignment",
+      "LLM alignment"
+    ],
+    "selection_score": 5,
+    "selection_rank": 21,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.1749.pdf",
+    "sha256": "21799fbd1f9c85a857923c649ed3655be516175e67d9fa5f01ace2d29a81099d"
+  },
+  {
+    "paper_id": "2026.findings-acl.2080",
+    "title": "ENPMR-Bench: Benchmarking Proactive Memory Retrieval for Emotional Support Agents",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.2080.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 5,
+    "selection_rank": 22,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.2080.pdf",
+    "sha256": "6b59911970f8a37a9fee900a40a7df073c31e7fdc3c73685fbb3033ba5ddc02e"
+  },
+  {
+    "paper_id": "2026.findings-acl.363",
+    "title": "PERM: Psychology-grounded Empathetic Reward Modeling for Large Language Models",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.363.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 5,
+    "selection_rank": 23,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.363.pdf",
+    "sha256": "2d06ac14afaca3ac236b705877c619607fa46dd5635df905063b8e70c16ab5d7"
+  },
+  {
+    "paper_id": "2026.findings-acl.846",
+    "title": "FreezeEmpath: Efficient Training for Empathetic Spoken Chatbots with Frozen LLMs",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.846.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotion recognition"
+    ],
+    "selection_score": 5,
+    "selection_rank": 24,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.846.pdf",
+    "sha256": "6578c3fd99a80f9419103cafd203b6b53f4ef09189c1bae8bca3199da20b0c0d"
+  },
+  {
+    "paper_id": "2026.healing-1.25",
+    "title": "Empathy as interactional accomplishment in clinical interactions with a conversational agent",
+    "year": 2026,
+    "venue": "HeaLing",
+    "pdf_url": "https://aclanthology.org/2026.healing-1.25.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "empathic"
+    ],
+    "selection_score": 5,
+    "selection_rank": 25,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.healing-1.25.pdf",
+    "sha256": "b6dd7e68b4aaaccc54e7b0cd2cb41a3946fa3131c3837fb31afc73b329d76ed1"
+  },
+  {
+    "paper_id": "2025.coling-main.10",
+    "title": "Sibyl: Empowering Empathetic Dialogue Generation in Large Language Models via Sensible and Visionary Commonsense Inference",
+    "year": 2025,
+    "venue": "COLING",
+    "pdf_url": "https://aclanthology.org/2025.coling-main.10.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 5,
+    "selection_rank": 26,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.coling-main.10.pdf",
+    "sha256": "38a3092cc4a8d20d176a04bc6ab2725a7a38367917edeef6d9294dcd3ce23c78"
+  },
+  {
+    "paper_id": "2025.coling-main.598",
+    "title": "From Traits to Empathy: Personality-Aware Multimodal Empathetic Response Generation",
+    "year": 2025,
+    "venue": "COLING",
+    "pdf_url": "https://aclanthology.org/2025.coling-main.598.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 5,
+    "selection_rank": 27,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.coling-main.598.pdf",
+    "sha256": "982810a35ebe2f88a5bb49dc284056ee5b85273e1bf314f06abf18ed40cff488"
+  },
+  {
+    "paper_id": "2025.findings-acl.101",
+    "title": "Chain-Talker: Chain Understanding and Rendering for Empathetic Conversational Speech Synthesis",
+    "year": 2025,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2025.findings-acl.101.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic",
+      "emotion understanding"
+    ],
+    "selection_score": 5,
+    "selection_rank": 28,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.findings-acl.101.pdf",
+    "sha256": "a69b70dc0219ec3135ea5ffc8a18c27275541dde9815dca58d415774feffb758"
+  },
+  {
+    "paper_id": "2026.acl-long.321",
+    "title": "STRIDE-ED: A Strategy-Grounded Stepwise Reasoning Framework for Empathetic Dialogue Systems",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.321.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 29,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.321.pdf",
+    "sha256": "fb816309e59eecb0d51b9a6be0b354bc4c2d4febacd7ed8c239857bf5fa5f4a1"
+  },
+  {
+    "paper_id": "2026.acl-long.372",
+    "title": "On the Emotion Understanding of Synthesized Speech",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.372.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion understanding"
+    ],
+    "selection_score": 4,
+    "selection_rank": 30,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.372.pdf",
+    "sha256": "d5e8b081f188f6ada1dfa829ce92a3177f614ea946cc8c2c6a560beca2d7adaa"
+  },
+  {
+    "paper_id": "2026.acl-long.806",
+    "title": "Cognitive Policy-Driven LLM for Diagnosis and Intervention of Cognitive Distortions in Emotional Support Conversation",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.806.pdf",
+    "matched_keywords": [
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 4,
+    "selection_rank": 31,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.806.pdf",
+    "sha256": "5d3ab968ec670fdde4c911dd74e989b195f07d3b8cf85c5870f3313ba000776d"
+  },
+  {
+    "paper_id": "2026.acl-long.860",
+    "title": "REG: Retrieval via Emotion Similarity for Guiding Empathetic Dialogue Generation",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-long.860.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 32,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-long.860.pdf",
+    "sha256": "59b46a69773c99f16834ce2ec0da0fede645a06b6472f2b7e923fd0344028ab3"
+  },
+  {
+    "paper_id": "2026.acl-srw.74",
+    "title": "Thesis Proposal: Toward a Human-Centered and Perspective-Aware Framework for Reproducible ML Evaluation and AI Alignment",
+    "year": 2026,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2026.acl-srw.74.pdf",
+    "matched_keywords": [
+      "human values",
+      "AI alignment"
+    ],
+    "selection_score": 4,
+    "selection_rank": 33,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.acl-srw.74.pdf",
+    "sha256": "96d670f488619672b6c69e9546f55b2360f089deb941d704e937e44c9fe07e88"
+  },
+  {
+    "paper_id": "2026.findings-acl.1484",
+    "title": "CogEmp:A Cognitive Empathy-Oriented Dialogue System for Structured Psychological Counseling",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.1484.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 34,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.1484.pdf",
+    "sha256": "ba2a68e0a76f75db7835f07e978ea33552283e62a4384b9f0936f5d33633f643"
+  },
+  {
+    "paper_id": "2026.findings-acl.1813",
+    "title": "AEQ-Bench: Measuring Empathy of Omni-Modal Large Models",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.1813.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 35,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.1813.pdf",
+    "sha256": "949a24976acfc4394382d12ebc557c0b96b3bf241a9d12c33f65d4ec8efe56e8"
+  },
+  {
+    "paper_id": "2026.findings-acl.1983",
+    "title": "Empathy Applicability Modeling for General Health Queries",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.1983.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 36,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.1983.pdf",
+    "sha256": "6debe3a6a3d00f5a2051cfb541a5f846d693c2526a0d49e1f4e51dd577df2b68"
+  },
+  {
+    "paper_id": "2026.findings-acl.440",
+    "title": "EmotionTalk: An Interactive Chinese Multimodal Emotion Dataset With Rich Annotations",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.440.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "multimodal emotion"
+    ],
+    "selection_score": 4,
+    "selection_rank": 37,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.440.pdf",
+    "sha256": "6a78dea99bbe09927d61395db943af15b60028cba4e0dfd7df7c65ae5f0bc652"
+  },
+  {
+    "paper_id": "2026.findings-acl.844",
+    "title": "Beyond Semantic Similarity: Appraisal-Guided Chain-of-Thought Reasoning and Retrieval for Multimodal Emotional Support Conversations",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-acl.844.pdf",
+    "matched_keywords": [
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 4,
+    "selection_rank": 38,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-acl.844.pdf",
+    "sha256": "af3bdcf56baecb680fca693c4984e9a33a13fae9d81425d4d8c16cf65e2be0fb"
+  },
+  {
+    "paper_id": "2026.findings-eacl.212",
+    "title": "Emotion Recognition in Multi-Speaker Conversations through Speaker Identification, Knowledge Distillation, and Hierarchical Fusion",
+    "year": 2026,
+    "venue": "Findings",
+    "pdf_url": "https://aclanthology.org/2026.findings-eacl.212.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion understanding"
+    ],
+    "selection_score": 4,
+    "selection_rank": 39,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.findings-eacl.212.pdf",
+    "sha256": "830232b5891ce78634c0a474827375263c59bec8bdb94c9c10551eb0a28f10ea"
+  },
+  {
+    "paper_id": "2026.lrec-1.210",
+    "title": "Empathy in Greek Exam-Related Support Conversations: A Comparative Evaluation of LLM Responses",
+    "year": 2026,
+    "venue": "LREC",
+    "pdf_url": "https://aclanthology.org/2026.lrec-1.210.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 40,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.lrec-1.210.pdf",
+    "sha256": "ff1b8d748ddf2a37d0f0ee66b7f02edd99559c4b798de70aef5f69333d4e0175"
+  },
+  {
+    "paper_id": "2026.lrec-1.212",
+    "title": "A Mental State Extraction Dataset for Theory-of-Mind-based Reasoning in Emotional Support Conversations",
+    "year": 2026,
+    "venue": "LREC",
+    "pdf_url": "https://aclanthology.org/2026.lrec-1.212.pdf",
+    "matched_keywords": [
+      "empathetic",
+      "emotional support"
+    ],
+    "selection_score": 4,
+    "selection_rank": 41,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.lrec-1.212.pdf",
+    "sha256": "7b2b20ea1158a8117898afd7a54b95a41c16e612ba2f8eb574215d582f06f31e"
+  },
+  {
+    "paper_id": "2026.lrec-1.226",
+    "title": "Knowledge-Infused Hierarchy-Aware Emotion Recognition in Code-mixed Mental Health Counseling Conversations",
+    "year": 2026,
+    "venue": "LREC",
+    "pdf_url": "https://aclanthology.org/2026.lrec-1.226.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion classification"
+    ],
+    "selection_score": 4,
+    "selection_rank": 42,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2026.lrec-1.226.pdf",
+    "sha256": "9b7a3fcabef908b8f8bd0a0704cd8e2e28b1c7b4f790bb44040228e8d6d13866"
+  },
+  {
+    "paper_id": "2025.acl-long.102",
+    "title": "ECERC: Evidence-Cause Attention Network for Multi-Modal Emotion Recognition in Conversation",
+    "year": 2025,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2025.acl-long.102.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion classification"
+    ],
+    "selection_score": 4,
+    "selection_rank": 43,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.acl-long.102.pdf",
+    "sha256": "55858648fd35d7278caaa51a1a4ab478bceb1c278edd84d1de9074e8e08b9eea"
+  },
+  {
+    "paper_id": "2025.acl-long.1148",
+    "title": "CoE: A Clue of Emotion Framework for Emotion Recognition in Conversations",
+    "year": 2025,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2025.acl-long.1148.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion understanding"
+    ],
+    "selection_score": 4,
+    "selection_rank": 44,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.acl-long.1148.pdf",
+    "sha256": "1c5c2b548ddffc41a2f37416a5c40e6ac5f3eab4fd669c99aaaddb102a648014"
+  },
+  {
+    "paper_id": "2025.acl-long.1235",
+    "title": "ReflectDiffu: Reflect between Emotion-intent Contagion and Mimicry for Empathetic Response Generation via a RL-Diffusion Framework",
+    "year": 2025,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2025.acl-long.1235.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 45,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.acl-long.1235.pdf",
+    "sha256": "2580a89191307c1c67041d3bbdaa9a0f1aaa1473bc6db94031771a66173e3c31"
+  },
+  {
+    "paper_id": "2025.acl-long.1395",
+    "title": "Dialogue Systems for Emotional Support via Value Reinforcement",
+    "year": 2025,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2025.acl-long.1395.pdf",
+    "matched_keywords": [
+      "emotional support",
+      "human values"
+    ],
+    "selection_score": 4,
+    "selection_rank": 46,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.acl-long.1395.pdf",
+    "sha256": "4e4d057e73ddb1474914b254a3c206f3be7d02dd84e1f2a7e782cb09d9ba1552"
+  },
+  {
+    "paper_id": "2025.acl-long.1408",
+    "title": "Towards Better Value Principles for Large Language Model Alignment: A Systematic Evaluation and Enhancement",
+    "year": 2025,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2025.acl-long.1408.pdf",
+    "matched_keywords": [
+      "human values",
+      "LLM alignment",
+      "language model alignment"
+    ],
+    "selection_score": 4,
+    "selection_rank": 47,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.acl-long.1408.pdf",
+    "sha256": "ccb9f80b91de50c08b52c79f7f3cfcc650b9fcac5b66a8e5dec44dbd7d63794a"
+  },
+  {
+    "paper_id": "2025.acl-long.925",
+    "title": "CULEMO: Cultural Lenses on Emotion - Benchmarking LLMs for Cross-Cultural Emotion Understanding",
+    "year": 2025,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2025.acl-long.925.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion understanding"
+    ],
+    "selection_score": 4,
+    "selection_rank": 48,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.acl-long.925.pdf",
+    "sha256": "8cb35c7f36865c58b6260c50ff4832cbdb9d5bbc9ab850c17c6a2a5d427f3803"
+  },
+  {
+    "paper_id": "2025.acl-short.88",
+    "title": "CHEER-Ekman: Fine-grained Embodied Emotion Classification",
+    "year": 2025,
+    "venue": "ACL",
+    "pdf_url": "https://aclanthology.org/2025.acl-short.88.pdf",
+    "matched_keywords": [
+      "emotion recognition",
+      "emotion classification"
+    ],
+    "selection_score": 4,
+    "selection_rank": 49,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.acl-short.88.pdf",
+    "sha256": "be6221f0efcb492866f0cb1a00d9206118ff4e1429983966b245e9d67bd4de81"
+  },
+  {
+    "paper_id": "2025.clpsych-1.13",
+    "title": "Synthetic Empathy: Generating and Evaluating Artificial Psychotherapy Dialogues to Detect Empathy in Counseling Sessions",
+    "year": 2025,
+    "venue": "CLPsych",
+    "pdf_url": "https://aclanthology.org/2025.clpsych-1.13.pdf",
+    "matched_keywords": [
+      "empathy",
+      "empathetic"
+    ],
+    "selection_score": 4,
+    "selection_rank": 50,
+    "download_status": "valid",
+    "local_pdf_path": "data/raw/2025.clpsych-1.13.pdf",
+    "sha256": "4eee0ac50275a71296ca580cfccdfe340bfa1f9627ca6b044efbe6d65d43ad51"
+  }
+]
