@@ -5,7 +5,7 @@
 * **選擇理由**：隨著大型語言模型 (LLM) 的普及，如何讓模型展現人類般的同理心並符合人類價值觀（Value Alignment）是當前 NLP 領域的核心課題。
 * **資料來源**：共涵蓋約 30 份從 ACL Anthology 獲取的論文，格式為 PDF。
 * **技術選型**：
-    * **LLM 接口**：使用 OpenAI SDK 介接校內 gpt-oss:20b 模型。
+    * **LLM 接口**：可選擇使用 OpenAI SDK 介接使用者設定的 OpenAI-compatible provider。
     * **向量資料庫**：ChromaDB (Persistent Mode)。
     * **嵌入模型**：paraphrase-multilingual-MiniLM-L12-v2。
 
@@ -17,7 +17,7 @@ graph LR
     C --> D[Sentence-Transformer\nMiniLM-L12]
     D --> E[(ChromaDB)]
     E --> F[rag_query.py]
-    F --> G[LiteLLM / gpt-oss:20b]
+    F --> G[OpenAI-compatible LLM optional]
     G --> H[skill_builder.py]
     H --> I[skill.md]
 ```
@@ -47,36 +47,40 @@ graph LR
 ## 4. 環境設定與執行方式
 
 ### 4-1. Python 版本與虛擬環境
-* 開發環境：**Python 3.13.0** (建議 Python >= 3.10)
+* `pyproject.toml` 目前限定 **Python 3.11–3.12**；正式支援聲明仍需在後續 CI matrix 完成驗證。Python 3.13 不在目前範圍內。
 
 ```bash
-    # ① 確認 Python 版本
-    python3 --version
+# ① 確認 Python 與 uv 版本
+python3 --version
+uv --version
 
-    # ② 建立並啟動虛擬環境
-    python3 -m venv .venv
-    source .venv/bin/activate  # macOS/Linux
+# ② 依 uv.lock 安裝 runtime 與 development dependencies
+uv sync --locked --all-groups
 
-    # ③ 安裝套件
-    pip install -r requirements.txt
-
-    # ④ 設定環境變數
-    cp .env.example .env
+# ③ 建立本機設定檔（不得提交真實 API key）
+cp .env.example .env
 ```
+
+Corpus acquisition、ingestion 與 indexing 不需要 LLM credentials。目前的問答與報告生成則需要在 `.env` 設定 provider-neutral 的 `LLM_BASE_URL`、`LLM_API_KEY` 與 `LLM_MODEL`。Groq 可作為 OpenAI-compatible provider 的範例，但 application logic 不依賴 Groq；endpoint、model availability、free tier 與 rate limits 可能變動，使用前請查閱 provider 的最新官方文件。
+
+所有相對路徑均以 project root 解析，而不是呼叫命令時的 current working directory。
 
 ### 4-2. Vector DB 啟動
 本專案使用 **ChromaDB (Embedded Mode)**，無需啟動 Docker 容器。資料將儲存於專案目錄下的 chroma_db/。
 
 ### 4-3. 完整執行流程
 ```bash
-    # ⑤ 全量重建索引
-    python data_update.py --rebuild
+# ④ 下載原始資料
+uv run python downloader.py
 
-    # ⑥ 測試 RAG 問答
-    python rag_query.py --model gpt-oss:20b
+# ⑤ 全量重建索引
+uv run python data_update.py --rebuild
 
-    # ⑦ 生成 Skill 文件
-    python skill_builder.py --output skill.md
+# ⑥ 測試 RAG 問答（需要 LLM_* 設定）
+uv run python rag_query.py
+
+# ⑦ 生成 Skill 文件（需要 LLM_* 設定）
+uv run python skill_builder.py --output skill.md
 ```
 
 ## 5. 資料來源聲明 (Data Sources Statement)

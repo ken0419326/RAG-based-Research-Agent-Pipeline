@@ -1,0 +1,40 @@
+[project]
+name = "rag-based-research-agent-pipeline"
+version = "0.1.0"
+description = "A reproducible local RAG pipeline for ACL research papers"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "acl-anthology",
+    "chromadb",
+    "langchain-text-splitters",
+    "openai",
+    "pypdf",
+    "python-dotenv",
+    "requests",
+    "sentence-transformers",
+    "tqdm",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0,<9",
+    "ruff>=0.11",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Preserve the existing report prompt verbatim during the configuration-only commit.
+"skill_builder.py" = ["E501"]

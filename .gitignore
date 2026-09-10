@@ -1,0 +1,45 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Virtual environments and Python artifacts
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Downloaded and processed corpus data
+data/raw/
+data/processed/
+
+# Local models and caches
+models/
+.cache/
+
+# ChromaDB persistence
+chroma_db/
+
+# Report checkpoints and ordinary generated reports
+temp_insights.json
+*.checkpoint.json
+reports/
+
+# Local evaluation output; keep the planned curated release artifact trackable
+eval/results/*.json
+!eval/results/release.json
+
+# Keep the planned provenance-backed example report trackable
+!examples/
+!examples/sample_report.md
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/

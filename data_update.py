@@ -1,128 +1,177 @@
-import os, argparse, chromadb, shutil, json, re
-from tqdm import tqdm
-from pypdf import PdfReader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
+import argparse
+import json
+import re
+import shutil
+import sys
+from contextlib import suppress
+from typing import Any
 
-RAW_DIR, PROCESSED_DIR = "data/raw", "data/processed"
-CHROMA_PATH = "chroma_db"
-MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
+from config import AppConfig, ConfigurationError
+
 
 class DataUpdatePipeline:
-    def __init__(self):
-        print(f"正在載入 Embedding 模型: {MODEL_NAME}...")
-        self.model = SentenceTransformer(MODEL_NAME)
-        self.db_client = chromadb.PersistentClient(path=CHROMA_PATH)
-        self.collection = self.db_client.get_or_create_collection(name="acl_research")
+    def __init__(self, config: AppConfig | None = None):
+        self.config = config or AppConfig.load()
+        self.model: Any | None = None
+        self.db_client: Any | None = None
+        self.collection: Any | None = None
+        self.text_splitter: Any | None = None
+        self.progress: Any | None = None
+
+    def _initialize(self) -> None:
+        if self.model is not None:
+            return
+
+        import chromadb
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        from sentence_transformers import SentenceTransformer
+        from tqdm import tqdm
+
+        print(f"正在載入 Embedding 模型: {self.config.embedding_model}...")
+        self.model = SentenceTransformer(self.config.embedding_model)
+        self.db_client = chromadb.PersistentClient(path=str(self.config.chroma_path))
+        self.collection = self.db_client.get_or_create_collection(name=self.config.collection_name)
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=100)
+        self.progress = tqdm
 
     def clean_text(self, text):
-        text = re.sub(r'<[^>]+>', '', text)  
-        text = re.sub(r'\s+', ' ', text)     
+        text = re.sub(r"<[^>]+>", "", text)
+        text = re.sub(r"\s+", " ", text)
         return text.strip()
 
     def process_content(self, rebuild=False):
         if rebuild:
-            print(f"正在清空 {PROCESSED_DIR}...")
-            shutil.rmtree(PROCESSED_DIR, ignore_errors=True)
-            os.makedirs(PROCESSED_DIR, exist_ok=True)
+            print(f"正在清空 {self.config.processed_dir}...")
+            shutil.rmtree(self.config.processed_dir, ignore_errors=True)
+        self.config.processed_dir.mkdir(parents=True, exist_ok=True)
 
-        abs_raw_path = os.path.abspath(RAW_DIR)
-        print(f"正在檢查目錄: {abs_raw_path}")
-        
-        raw_files = [f for f in os.listdir(RAW_DIR) if f.lower().endswith(('.pdf', '.md', '.txt'))]
+        print(f"正在檢查目錄: {self.config.raw_dir}")
+
+        raw_files = [
+            path.name
+            for path in self.config.raw_dir.iterdir()
+            if path.is_file() and path.suffix.lower() in {".pdf", ".md", ".txt"}
+        ]
         print(f"找到 {len(raw_files)} 個原始檔案: {raw_files}")
 
         if not raw_files:
             print("錯誤：在 data/raw 中找不到任何 PDF, MD 或 TXT 檔案！請確認路徑。")
             return
 
-        for filename in tqdm(raw_files, desc="解析檔案"):
-            base_name = filename.rsplit('.', 1)[0]
-            ext = filename.rsplit('.', 1)[1].lower()
-            txt_path = os.path.join(PROCESSED_DIR, f"{base_name}.txt")
-            json_meta_path = os.path.join(RAW_DIR, f"{base_name}.json")
-            
-            if os.path.exists(txt_path) and not rebuild:
+        for filename in self.progress(raw_files, desc="解析檔案"):
+            base_name = filename.rsplit(".", 1)[0]
+            ext = filename.rsplit(".", 1)[1].lower()
+            txt_path = self.config.processed_dir / f"{base_name}.txt"
+            json_meta_path = self.config.raw_dir / f"{base_name}.json"
+
+            if txt_path.exists() and not rebuild:
                 continue
 
             metadata_part = ""
             body_part = ""
-            
-            if os.path.exists(json_meta_path):
+
+            if json_meta_path.exists():
                 try:
-                    with open(json_meta_path, 'r', encoding='utf-8') as f:
+                    with json_meta_path.open("r", encoding="utf-8") as f:
                         m = json.load(f)
                         metadata_part += f"Title: {m.get('title', '')}\n"
                         metadata_part += f"Year: {m.get('year', '')}\n"
                         metadata_part += f"ID: {m.get('paper_id', '')}\n"
                         metadata_part += f"Abstract: {m.get('abstract', '')}\n"
                         metadata_part += "--- CONTENT_START ---\n"
-                except: pass
+                except Exception:
+                    pass
             else:
                 print(f"找不到對應的 JSON 描述檔: {base_name}.json")
 
             try:
                 if ext == "pdf":
-                    reader = PdfReader(os.path.join(RAW_DIR, filename))
+                    from pypdf import PdfReader
+
+                    reader = PdfReader(self.config.raw_dir / filename)
                     for page in reader.pages:
                         p_text = page.extract_text() or ""
                         if "References" in p_text:
-                            body_part += p_text.split("References")[0]; break
+                            body_part += p_text.split("References")[0]
+                            break
                         body_part += p_text + "\n"
                 else:
-                    with open(os.path.join(RAW_DIR, filename), 'r', encoding='utf-8') as f:
+                    with (self.config.raw_dir / filename).open("r", encoding="utf-8") as f:
                         body_part = f.read()
-                
-                with open(txt_path, 'w', encoding='utf-8') as f:
+
+                with txt_path.open("w", encoding="utf-8") as f:
                     f.write(metadata_part + self.clean_text(body_part))
-                    
+
             except Exception as e:
                 print(f"無法解析 {filename}: {e}")
 
     def index_data(self, rebuild=False):
         if rebuild:
             print("重置 Vector DB...")
-            try: self.db_client.delete_collection("acl_research")
-            except: pass
-            self.collection = self.db_client.create_collection("acl_research")
+            with suppress(Exception):
+                self.db_client.delete_collection(self.config.collection_name)
+            self.collection = self.db_client.create_collection(self.config.collection_name)
 
-        txt_files = [f for f in os.listdir(PROCESSED_DIR) if f.endswith('.txt')]
+        txt_files = [
+            path.name
+            for path in self.config.processed_dir.iterdir()
+            if path.is_file() and path.suffix == ".txt"
+        ]
         print(f"準備向量化 {len(txt_files)} 個處理後的文字檔...")
 
-        for txt_file in tqdm(txt_files, desc="建立索引"):
-            path = os.path.join(PROCESSED_DIR, txt_file)
-            with open(path, 'r', encoding='utf-8') as f:
+        for txt_file in self.progress(txt_files, desc="建立索引"):
+            path = self.config.processed_dir / txt_file
+            with path.open("r", encoding="utf-8") as f:
                 lines = f.readlines()
-            
+
             meta, content_body, is_body = {"source": txt_file}, "", False
-            for l in lines:
-                if "--- CONTENT_START ---" in l:
+            for line in lines:
+                if "--- CONTENT_START ---" in line:
                     is_body = True
                     continue
                 if not is_body:
-                    if l.startswith("Title: "): meta["title"] = l[7:].strip()
-                    elif l.startswith("Year: "): meta["year"] = l[6:].strip()
-                    elif l.startswith("ID: "): meta["paper_id"] = l[4:].strip()
-                    elif l.startswith("Abstract: "): content_body += l[10:] 
+                    if line.startswith("Title: "):
+                        meta["title"] = line[7:].strip()
+                    elif line.startswith("Year: "):
+                        meta["year"] = line[6:].strip()
+                    elif line.startswith("ID: "):
+                        meta["paper_id"] = line[4:].strip()
+                    elif line.startswith("Abstract: "):
+                        content_body += line[10:]
                 else:
-                    content_body += l
+                    content_body += line
 
             chunks = self.text_splitter.split_text(content_body.strip())
-            if not chunks: continue
-            
+            if not chunks:
+                continue
+
             embeddings = self.model.encode(chunks).tolist()
             ids = [f"{txt_file}#c{i}" for i in range(len(chunks))]
             metadatas = [meta.copy() for _ in range(len(chunks))]
-            self.collection.upsert(ids=ids, embeddings=embeddings, documents=chunks, metadatas=metadatas)
+            self.collection.upsert(
+                ids=ids, embeddings=embeddings, documents=chunks, metadatas=metadatas
+            )
 
     def run(self, rebuild):
+        self.config.validate_ingestion()
+        self._initialize()
         self.process_content(rebuild)
         self.index_data(rebuild)
         print(f"完成！目前 DB 片段總數: {self.collection.count()}")
 
-if __name__ == "__main__":
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--rebuild", action="store_true")
-    args = parser.parse_args()
-    DataUpdatePipeline().run(rebuild=args.rebuild)
+    args = parser.parse_args(argv)
+    try:
+        pipeline = DataUpdatePipeline()
+        pipeline.run(rebuild=args.rebuild)
+    except ConfigurationError as exc:
+        print(f"Configuration error: {exc}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
