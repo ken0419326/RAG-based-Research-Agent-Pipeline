@@ -4,6 +4,7 @@ import sys
 from typing import Any
 
 from config import AppConfig, ConfigurationError
+from generation import GenerationError, GenerationResult, GenerationService
 from retrieval import RetrievalError, RetrievalResult, RetrievalService
 
 
@@ -16,6 +17,7 @@ class RAGQuerySystem:
         self.client: Any | None = None
         self.history = []
         self.retrieval_service: RetrievalService | None = None
+        self.generation_service: GenerationService | None = None
 
     def _initialize_retrieval(self) -> None:
         if self.embed_model is not None:
@@ -31,57 +33,37 @@ class RAGQuerySystem:
 
     def _initialize_generation(self, model_override: str | None = None) -> str:
         self.config.validate_generation(model_override=model_override)
-        if self.client is None:
-            from openai import OpenAI
-
-            self.client = OpenAI(
-                api_key=self.config.llm_api_key,
-                base_url=self.config.llm_base_url,
-            )
+        if self.generation_service is None:
+            self.generation_service = GenerationService(self.config)
         return model_override or self.config.llm_model or ""
 
     def retrieve(self, query, top_k=5):
         """從資料庫檢索相關片段"""
         self._initialize_retrieval()
-        return self.retrieval_service.query_raw(query, top_k=top_k)
+        return self.retrieval_service.retrieve(query, top_k=top_k)
 
-    def generate_answer(self, query, context_results, model=None):
-        """組裝 Prompt 並透過 OpenAI SDK 呼叫 LLM"""
-        effective_model = self._initialize_generation(model_override=model)
-
-        context_list = []
-        sources = []
-        for i in range(len(context_results["documents"][0])):
-            doc = context_results["documents"][0][i]
-            meta = context_results["metadatas"][0][i]
-            source_info = f"[{meta.get('title', 'Unknown')}, {meta.get('year', 'N/A')}]"
-            context_list.append(f"來源 {i + 1} {source_info}:\n{doc}")
-            sources.append(source_info)
-
-        context_str = "\n\n".join(context_list)
-
-        system_prompt = (
-            "你是一位專業的 NLP 研究助理。請根據下方的參考資料回答問題。\n"
-            "若資料不足請直說。回答需專業且精確，並在適當時機引用來源標籤。"
+    def generate_answer(
+        self,
+        query: str,
+        context_results: list[RetrievalResult],
+        model: str | None = None,
+    ) -> GenerationResult:
+        """Generate a source-aware answer while retaining only process-local history."""
+        self._initialize_generation(model_override=model)
+        result = self.generation_service.generate(
+            query,
+            context_results,
+            history=self.history[-6:],
+            model_override=model,
         )
-
-        messages = [{"role": "system", "content": system_prompt}]
-        messages.extend(self.history[-6:])
-
-        user_content = f"--- 參考資料 ---\n{context_str}\n\n--- 問題 ---\n{query}"
-        messages.append({"role": "user", "content": user_content})
-
-        response = self.client.chat.completions.create(
-            model=effective_model,
-            messages=messages,
-        )
-
-        answer = response.choices[0].message.content
-
+        self.client = self.generation_service.client
         self.history.append({"role": "user", "content": query})
-        self.history.append({"role": "assistant", "content": answer})
+        self.history.append({"role": "assistant", "content": result.answer})
+        return result
 
-        return answer, list(set(sources))
+    def ask(self, query: str, *, top_k: int = 5, model: str | None = None) -> GenerationResult:
+        sources = self.retrieve(query, top_k=top_k)
+        return self.generate_answer(query, sources, model=model)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -108,24 +90,25 @@ def main(argv: list[str] | None = None) -> int:
         rag = RAGQuerySystem(config=config)
 
         if args.query:
-            context = rag.retrieve(args.query, top_k=args.top_k)
-            answer, sources = rag.generate_answer(args.query, context, model=args.model)
-            print(f"\n回答：\n{answer}\n\n引用來源：{sources}")
+            result = rag.ask(args.query, top_k=args.top_k, model=args.model)
+            _print_generation_result(result)
         else:
             print("已進入互動模式 (輸入 exit 離開)")
             while True:
                 u_input = input("\n問題: ")
                 if u_input.lower() in ["exit", "quit"]:
                     break
-                context = rag.retrieve(u_input, top_k=args.top_k)
-                answer, sources = rag.generate_answer(u_input, context, model=args.model)
-                print(f"\n回答：\n{answer}\n\n引用來源：{sources}")
+                result = rag.ask(u_input, top_k=args.top_k, model=args.model)
+                _print_generation_result(result)
     except ConfigurationError as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
     except RetrievalError as exc:
         print(f"Retrieval error: {exc}", file=sys.stderr)
         return 2
+    except GenerationError as exc:
+        print(f"Generation error: {exc}", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -141,6 +124,19 @@ def _print_retrieval_results(results: list[RetrievalResult], *, json_output: boo
             f"URL: {result.url}\n"
             f"{result.text}\n"
         )
+
+
+def _print_generation_result(result: GenerationResult) -> None:
+    cited_titles = [source.title for source in result.cited_sources]
+    print(f"\n回答：\n{result.answer}")
+    print(f"\n有效引用 ID：{list(result.cited_source_ids)}")
+    print(f"無效引用 ID：{list(result.invalid_source_ids)}")
+    print(f"引用論文：{cited_titles}")
+    print(
+        "引用 ID 驗證："
+        f"{'通過' if result.citation_validation_passed else '失敗'}"
+        "（僅驗證 ID，不代表內容正確性）"
+    )
 
 
 if __name__ == "__main__":

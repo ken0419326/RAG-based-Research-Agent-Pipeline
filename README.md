@@ -16,10 +16,12 @@ graph LR
     B --> C{Page-local 750/100\nCharacter Chunking}
     C --> D[Sentence-Transformer\nMiniLM-L12]
     D --> E[(ChromaDB)]
-    E --> F[rag_query.py]
-    F --> G[OpenAI-compatible LLM optional]
-    G --> H[skill_builder.py]
-    H --> I[skill.md]
+    E --> F[RetrievalService]
+    F --> G[rag_query.py]
+    F --> H[skill_builder.py]
+    G --> I[OpenAI-compatible LLM optional]
+    H --> I
+    H --> J[Markdown report]
 ```
 
 ## 3. 設計決策說明 (Design Decisions)
@@ -82,11 +84,11 @@ uv run python data_update.py --build-index
 # ⑦ Retrieval-only 查詢（不需要 LLM_*；可加 --json 取得 JSON）
 uv run python rag_query.py --query "your question" --top-k 5 --retrieval-only
 
-# ⑧ 測試 RAG 問答（需要 LLM_* 設定）
-uv run python rag_query.py
+# ⑧ 產生帶有 validated source IDs 的回答（需要 LLM_* 設定）
+uv run python rag_query.py --query "your question" --top-k 5
 
-# ⑨ 生成 Skill 文件（需要 LLM_* 設定）
-uv run python skill_builder.py --output skill.md
+# ⑨ 生成 checkpointed Markdown research report（需要 LLM_* 設定）
+uv run python skill_builder.py --output reports/research_report.md
 ```
 
 `--prepare-only` 僅處理 fixed manifest 的 50 份 PDF，逐頁使用 `pypdf` 擷取全文並將 provenance-rich chunks 原子寫入 Git-ignored 的 `data/processed/chunks.jsonl`。摘要輸出會分別列出 selected、parsed、failed、empty、pages 與 chunks；此命令不需要 embedding model、ChromaDB 或 LLM credentials。
@@ -94,6 +96,10 @@ uv run python skill_builder.py --output skill.md
 `--build-index` 僅以 `data/processed/chunks.jsonl` 為輸入，分批建立新的 Chroma collection。Collection count、paper coverage、embedding dimension 與 sample readability 全部驗證成功後，才會更新 `chroma_db/index_manifest.json` 與 `chroma_db/active_index.json`；失敗不會切換 active collection，舊 collections 也不會自動刪除。此命令使用設定的 embedding model，但不需要 LLM credentials。
 
 `--retrieval-only` 只會開啟 active pointer 指定的既有 collection，不會建立空 collection 或初始化 LLM client。結果依 Chroma 回傳順序列出 `[S1]`、`[S2]` 等 response-level source IDs，以及明確標為 distance 的距離值、paper/chunk provenance 與 passage text；distance 不是 accuracy。加上 `--json` 可輸出相同欄位的 JSON array。
+
+未指定 `--retrieval-only` 時，程式會透過 provider-neutral `LLM_*` 設定呼叫 OpenAI-compatible provider，並要求回答只引用當次 retrieved context 中的 `[S#]`。程式會分別回報 valid 與 invalid source IDs，且只依 verified retrieval metadata 列出 cited papers；ID validation 僅表示引用存在於當次 source map，不代表回答內容必然正確。
+
+`skill_builder.py` 直接共用 retrieval 與 generation services。四個既有 report questions 的 completed IDs 與 active index identity 會原子寫入 ignored checkpoint；stale/corrupt checkpoint 會被拒絕。最終 Markdown 亦以 temporary file 加 replace 寫入，Source References table 由 verified metadata 程式化產生，而非交由 LLM 撰寫。一般報告預設輸出至 ignored 的 `reports/`；既有 tracked `skill.md` 將留到後續文件整理階段處理。
 
 #### Downloader 行為
 
