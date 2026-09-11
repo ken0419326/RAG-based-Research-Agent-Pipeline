@@ -212,6 +212,26 @@ Runner比較四組paper-level設定：A為前5個dense chunks（重複paper會�
 uv run python -m eval.run_retrieval --output eval/results/release.json
 ```
 
+以下為以乾淨revision `6cad815dae8f5b7cdb32954de8c737406e597041`執行的release結果。Cold setup包含該configuration需要的resource initialization；warmed latency在resources載入後，以全部12題的query時間取平均。
+
+| Configuration | Recall@5 | MRR@5 | nDCG@5 | Cold setup (ms) | Warmed avg/query (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| A — dense chunks | 0.636364 | 0.613636 | 0.565088 | 4850.47 | 27.53 |
+| B — dense paper dedup | 0.636364 | 0.613636 | 0.565088 | 4850.47 | 37.81 |
+| C — dense + BM25 + RRF | 0.636364 | 0.727273 | 0.655982 | 4902.74 | 25.32 |
+| D — hybrid + BGE reranking | 0.878788 | 0.909091 | 0.877504 | 5792.39 | 5707.77 |
+
+| Configuration / language | Recall@5 | MRR@5 | nDCG@5 | Warmed avg/query (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| A — English | 0.761905 | 0.678571 | 0.647269 | 12.89 |
+| A — Chinese | 0.416667 | 0.500000 | 0.421270 | 56.82 |
+| B — English | 0.761905 | 0.678571 | 0.647269 | 32.08 |
+| B — Chinese | 0.416667 | 0.500000 | 0.421270 | 49.28 |
+| C — English | 0.761905 | 0.857143 | 0.790103 | 22.48 |
+| C — Chinese | 0.416667 | 0.500000 | 0.421270 | 31.00 |
+| D — English | 1.000000 | 1.000000 | 0.995353 | 6650.67 |
+| D — Chinese | 0.666667 | 0.750000 | 0.671270 | 3821.96 |
+
 Runner將overall、English-only及Chinese-only的Recall@5、MRR@5、nDCG@5分開輸出，並區分cold-start setup與resources載入後的warmed average query latency。Aggregate metrics只計算11題具有non-empty owner labels的queries；latency則涵蓋全部12題。Out-of-scope query保存實際rankings，但三個metrics為`null`且不納入macro average。
 
 完整四組per-query rankings、distances、runtime、corpus/index identities及ingestion statistics會寫入tracked [`eval/results/release.json`](eval/results/release.json)；不包含full chunks或secrets。Gold relevance本身由title/abstract整理，因此D同樣使用title/abstract rerank可能帶來評估偏差；結果不能外推為一般RAG品質、groundedness或generation品質。
@@ -234,7 +254,7 @@ Runner將overall、English-only及Chinese-only的Recall@5、MRR@5、nDCG@5分開
 - Relevance judgments只根據titles/abstracts人工整理，規模小且沒有independent assessors。
 - `pypdf` extraction不支援OCR、layout-aware parsing、table reconstruction或scanned PDFs。
 - Character chunking可能切斷語意；目前沒有token-aware chunking實驗。
-- Retrieval只有dense embeddings，沒有hybrid search、reranking或query rewriting。
+- Retrieval已支援dense baseline、BM25/RRF hybrid search與optional BGE reranking，但沒有query rewriting。
 - Out-of-scope query仍會得到nearest-neighbor passages；目前沒有abstention threshold。
 - Citation validation只檢查source ID membership，不測量claim-level correctness或groundedness。
 - Optional generation依賴外部provider，其availability、model behavior、rate limits與價格不可由本repository保證。
@@ -242,4 +262,4 @@ Runner將overall、English-only及Chinese-only的Recall@5、MRR@5、nDCG@5分開
 
 ## Future Work
 
-初始release之外可能考慮：incremental indexing、hybrid retrieval、reranking、token-aware chunking、OCR/layout-aware parsing、persistent multi-user history、FastAPI、Docker、authentication、cloud deployment、hosted vector databases、streaming及明確標示為optional experiment的LLM-as-judge。這些項目目前均未實作。
+初始release之外可能考慮：incremental indexing、token-aware chunking、OCR/layout-aware parsing、query rewriting、persistent multi-user history、FastAPI、Docker、authentication、cloud deployment、hosted vector databases、streaming及明確標示為optional experiment的LLM-as-judge。這些項目目前均未實作。
