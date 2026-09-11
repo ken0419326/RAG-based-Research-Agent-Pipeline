@@ -2,8 +2,6 @@
 
 A multilingual RAG research assistant for retrieving and synthesizing recent ACL papers on empathy, emotion recognition, and value alignment. The system provides deterministic corpus construction, provenance-aware indexing, hybrid retrieval, validated citation IDs, and reproducible evaluation.
 
-這是 multilingual RAG research prototype，不是 production-ready service，也不提供回答正確性保證。
-
 ## 功能範圍
 
 - 以固定規則取得 ACL Anthology 2025–2026 論文候選並下載 canonical 50-paper corpus。
