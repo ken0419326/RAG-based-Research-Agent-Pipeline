@@ -31,6 +31,7 @@ class AppConfig:
     chroma_path: Path
     collection_name: str
     embedding_model: str
+    reranker_model: str
     checkpoint_path: Path
     llm_base_url: str | None
     llm_api_key: str | None
@@ -63,6 +64,7 @@ class AppConfig:
             chroma_path=_project_path(values.get("CHROMA_PERSIST_DIR"), "chroma_db"),
             collection_name=values.get("CHROMA_COLLECTION", "acl_research"),
             embedding_model=values.get("EMBEDDING_MODEL", "paraphrase-multilingual-MiniLM-L12-v2"),
+            reranker_model=values.get("RERANKER_MODEL", "BAAI/bge-reranker-v2-m3"),
             checkpoint_path=_project_path(
                 values.get("REPORT_CHECKPOINT_PATH"), "temp_insights.json"
             ),

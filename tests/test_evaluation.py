@@ -7,7 +7,11 @@ from pathlib import Path
 import pytest
 
 from eval.metrics import ndcg_at_k, recall_at_k, reciprocal_rank_at_k
-from eval.run_retrieval import EvaluationError, load_evaluation_queries
+from eval.run_retrieval import (
+    EvaluationError,
+    language_summaries,
+    load_evaluation_queries,
+)
 
 
 def test_retrieval_metrics_use_unique_paper_rankings():
@@ -62,7 +66,7 @@ def test_evaluation_file_rejects_unknown_manifest_paper(tmp_path):
         load_evaluation_queries(path, manifest_paper_ids={"known-paper"})
 
 
-def test_release_evaluation_file_is_valid():
+def test_release_evaluation_queries_are_valid():
     manifest = json.loads(Path("corpus/manifest.json").read_text(encoding="utf-8"))
     manifest_ids = {item["paper_id"] for item in manifest}
 
@@ -73,3 +77,25 @@ def test_release_evaluation_file_is_valid():
 
     assert len(queries) == 12
     assert all(set(query.relevant_paper_ids) <= manifest_ids for query in queries)
+
+
+def test_language_summaries_report_metrics_and_latency():
+    items = [
+        {
+            "language": "en",
+            "metrics": {"recall_at_5": 1.0, "mrr_at_5": 0.5, "ndcg_at_5": 0.75},
+            "retrieval_latency_ms": 10.0,
+        },
+        {
+            "language": "zh-TW",
+            "metrics": {"recall_at_5": 0.5, "mrr_at_5": 1.0, "ndcg_at_5": 0.5},
+            "retrieval_latency_ms": 30.0,
+        },
+    ]
+
+    summaries = language_summaries(items)
+
+    assert summaries["overall"]["recall_at_5"] == 0.75
+    assert summaries["overall"]["warmed_average_query_latency_ms"] == 20.0
+    assert summaries["english_only"]["mrr_at_5"] == 0.5
+    assert summaries["chinese_only"]["ndcg_at_5"] == 0.5

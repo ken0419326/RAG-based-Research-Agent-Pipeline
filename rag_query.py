@@ -5,6 +5,7 @@ from typing import Any
 
 from config import AppConfig, ConfigurationError
 from generation import GenerationError, GenerationResult, GenerationService
+from hybrid_retrieval import DENSE, RETRIEVAL_CONFIGURATIONS, PaperRetrievalService
 from retrieval import RetrievalError, RetrievalResult, RetrievalService
 
 
@@ -72,6 +73,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--model", type=str, default=None)
     parser.add_argument("--retrieval-only", action="store_true")
+    parser.add_argument(
+        "--retrieval-config",
+        choices=RETRIEVAL_CONFIGURATIONS,
+        default=DENSE,
+        help="Paper retrieval strategy; applies only to --retrieval-only.",
+    )
     parser.add_argument("--json", action="store_true", dest="json_output")
     args = parser.parse_args(argv)
 
@@ -80,10 +87,21 @@ def main(argv: list[str] | None = None) -> int:
         if args.retrieval_only:
             if not args.query:
                 parser.error("--retrieval-only requires --query")
-            service = RetrievalService(config)
-            results = service.retrieve(args.query, top_k=args.top_k)
+            if args.retrieval_config == DENSE:
+                service = RetrievalService(config)
+                results = service.retrieve(args.query, top_k=args.top_k)
+            else:
+                service = PaperRetrievalService(config)
+                results = service.retrieve(
+                    args.query,
+                    configuration=args.retrieval_config,
+                    top_k=args.top_k,
+                )
             _print_retrieval_results(results, json_output=args.json_output)
             return 0
+
+        if args.retrieval_config != DENSE:
+            parser.error("--retrieval-config applies only to --retrieval-only")
 
         config.validate_retrieval()
         config.validate_generation(model_override=args.model)

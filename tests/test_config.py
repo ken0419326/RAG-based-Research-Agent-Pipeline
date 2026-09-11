@@ -97,3 +97,11 @@ def test_model_override_satisfies_generation_model_requirement():
     )
 
     config.validate_generation(model_override="test-model")
+
+
+def test_reranker_model_has_an_environment_override():
+    default = load_config()
+    overridden = load_config({"RERANKER_MODEL": "example/custom-reranker"})
+
+    assert default.reranker_model == "BAAI/bge-reranker-v2-m3"
+    assert overridden.reranker_model == "example/custom-reranker"

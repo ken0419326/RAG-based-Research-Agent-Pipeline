@@ -196,12 +196,10 @@ class RetrievalService:
         self.collection = collection
         self.embedder = embedder
 
-    def query_raw(self, query: str, *, top_k: int = 5) -> dict[str, Any]:
-        """Return the raw ordered Chroma result for legacy generation code."""
+    def embed_query(self, query: str) -> list[float]:
+        """Embed one validated query with the model bound to the active index."""
         if not query.strip():
             raise RetrievalError("Query must not be empty.")
-        if top_k <= 0:
-            raise RetrievalError("top-k must be a positive integer.")
         self.initialize()
         try:
             vectors = self.embedder.encode([query])
@@ -213,47 +211,112 @@ class RetrievalService:
                 f"Query embedding dimension is {len(query_vector)}; "
                 f"index requires {self.active_index.embedding_dimension}."
             )
-        try:
-            return self.collection.query(
-                query_embeddings=[query_vector],
-                n_results=min(top_k, self.active_index.chunk_count),
-                include=["documents", "metadatas", "distances"],
+        return query_vector
+
+    def query_by_vector(
+        self,
+        query_vector: list[float],
+        *,
+        top_k: int = 5,
+        paper_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Query the active collection, optionally restricted to one paper."""
+        if top_k <= 0:
+            raise RetrievalError("top-k must be a positive integer.")
+        self.initialize()
+        if len(query_vector) != self.active_index.embedding_dimension:
+            raise RetrievalError(
+                f"Query embedding dimension is {len(query_vector)}; "
+                f"index requires {self.active_index.embedding_dimension}."
             )
+        options: dict[str, Any] = {
+            "query_embeddings": [query_vector],
+            "n_results": min(top_k, self.active_index.chunk_count),
+            "include": ["documents", "metadatas", "distances"],
+        }
+        if paper_id is not None:
+            options["where"] = {"paper_id": paper_id}
+        try:
+            return self.collection.query(**options)
         except Exception as error:
             raise RetrievalError(f"Chroma query failed: {error}") from error
 
+    def query_raw(self, query: str, *, top_k: int = 5) -> dict[str, Any]:
+        """Return the raw ordered Chroma result for legacy generation code."""
+        return self.query_by_vector(self.embed_query(query), top_k=top_k)
+
     def retrieve(self, query: str, *, top_k: int = 5) -> list[RetrievalResult]:
         """Return ordered passages with stable response-level source IDs."""
-        raw = self.query_raw(query, top_k=top_k)
-        ids = _first_result_list(raw, "ids")
-        documents = _first_result_list(raw, "documents")
-        metadatas = _first_result_list(raw, "metadatas")
-        distances = _first_result_list(raw, "distances")
-        if not (len(ids) == len(documents) == len(metadatas) == len(distances)):
-            raise RetrievalError("Chroma returned result fields with inconsistent lengths.")
+        return self.retrieve_by_vector(self.embed_query(query), top_k=top_k)
 
-        results = []
-        for rank, (chunk_id, text, metadata, distance) in enumerate(
-            zip(ids, documents, metadatas, distances, strict=True), start=1
-        ):
-            if not isinstance(metadata, dict) or not metadata.keys() >= REQUIRED_RESULT_METADATA:
-                raise RetrievalError(f"Retrieval result {rank} has incomplete provenance metadata.")
-            results.append(
+    def retrieve_by_vector(
+        self, query_vector: list[float], *, top_k: int = 5, paper_id: str | None = None
+    ) -> list[RetrievalResult]:
+        """Return ordered passages for an already computed query vector."""
+        raw = self.query_by_vector(query_vector, top_k=top_k, paper_id=paper_id)
+        return _retrieval_results(raw)
+
+    def supporting_chunks(
+        self, query_vector: list[float], paper_ids: list[str] | tuple[str, ...]
+    ) -> list[RetrievalResult]:
+        """Return the best dense chunk for each paper, preserving paper order."""
+        if len(set(paper_ids)) != len(paper_ids):
+            raise RetrievalError("Supporting-chunk paper IDs must be unique.")
+        supporting = []
+        for paper_id in paper_ids:
+            matches = self.retrieve_by_vector(query_vector, top_k=1, paper_id=paper_id)
+            if not matches:
+                raise RetrievalError(f"No supporting chunk found for selected paper {paper_id}.")
+            source = matches[0]
+            supporting.append(
                 RetrievalResult(
-                    rank=rank,
-                    source_id=f"[S{rank}]",
-                    distance=float(distance),
-                    chunk_id=str(chunk_id),
-                    paper_id=str(metadata["paper_id"]),
-                    title=str(metadata["title"]),
-                    year=int(metadata["year"]),
-                    venue=str(metadata["venue"]),
-                    page=int(metadata["page"]),
-                    url=str(metadata["url"]),
-                    text=str(text),
+                    rank=len(supporting) + 1,
+                    source_id=f"[S{len(supporting) + 1}]",
+                    distance=source.distance,
+                    chunk_id=source.chunk_id,
+                    paper_id=source.paper_id,
+                    title=source.title,
+                    year=source.year,
+                    venue=source.venue,
+                    page=source.page,
+                    url=source.url,
+                    text=source.text,
                 )
             )
-        return results
+        return supporting
+
+
+def _retrieval_results(raw: dict[str, Any]) -> list[RetrievalResult]:
+    """Materialize one ordered Chroma result without deduplicating papers."""
+    ids = _first_result_list(raw, "ids")
+    documents = _first_result_list(raw, "documents")
+    metadatas = _first_result_list(raw, "metadatas")
+    distances = _first_result_list(raw, "distances")
+    if not (len(ids) == len(documents) == len(metadatas) == len(distances)):
+        raise RetrievalError("Chroma returned result fields with inconsistent lengths.")
+
+    results = []
+    for rank, (chunk_id, text, metadata, distance) in enumerate(
+        zip(ids, documents, metadatas, distances, strict=True), start=1
+    ):
+        if not isinstance(metadata, dict) or not metadata.keys() >= REQUIRED_RESULT_METADATA:
+            raise RetrievalError(f"Retrieval result {rank} has incomplete provenance metadata.")
+        results.append(
+            RetrievalResult(
+                rank=rank,
+                source_id=f"[S{rank}]",
+                distance=float(distance),
+                chunk_id=str(chunk_id),
+                paper_id=str(metadata["paper_id"]),
+                title=str(metadata["title"]),
+                year=int(metadata["year"]),
+                venue=str(metadata["venue"]),
+                page=int(metadata["page"]),
+                url=str(metadata["url"]),
+                text=str(text),
+            )
+        )
+    return results
 
 
 def _first_result_list(raw: dict[str, Any], field: str) -> list[Any]:

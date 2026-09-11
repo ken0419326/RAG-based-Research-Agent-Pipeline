@@ -18,11 +18,28 @@ from typing import Any
 
 from config import AppConfig, ConfigurationError
 from eval.metrics import ndcg_at_k, recall_at_k, reciprocal_rank_at_k
+from hybrid_retrieval import (
+    DENSE,
+    DENSE_DEDUP,
+    HYBRID,
+    HYBRID_RERANK,
+    PaperRetrievalService,
+)
 from reporting import ReportError, atomic_write_json
 from retrieval import RetrievalError, RetrievalService
 
 EVALUATION_TOP_K = 5
 CANDIDATE_CHUNK_COUNT = 20
+EVALUATION_CONFIGURATIONS = (
+    (DENSE, "A", "First five dense chunks; duplicate papers may consume positions."),
+    (DENSE_DEDUP, "B", "Top 20 dense chunks, then first five unique papers."),
+    (HYBRID, "C", "Dense-20 plus positive-score BM25-20, fused with RRF."),
+    (
+        HYBRID_RERANK,
+        "D",
+        "Hybrid top 20 unique papers reranked by BGE over title and abstract.",
+    ),
+)
 JUDGMENT_BASIS = "manually_curated_from_titles_and_abstracts"
 QUERY_FIELDS = frozenset(
     {
@@ -200,6 +217,37 @@ def _mean(values: list[float | None]) -> float:
     return statistics.fmean(scored)
 
 
+def summarize_results(items: list[dict[str, Any]]) -> dict[str, Any]:
+    """Compute macro retrieval metrics and latency for one query subset."""
+    return {
+        "query_count": len(items),
+        "scored_query_count": sum(item["metrics"]["recall_at_5"] is not None for item in items),
+        "recall_at_5": _mean([item["metrics"]["recall_at_5"] for item in items]),
+        "mrr_at_5": _mean([item["metrics"]["mrr_at_5"] for item in items]),
+        "ndcg_at_5": _mean([item["metrics"]["ndcg_at_5"] for item in items]),
+        "warmed_average_query_latency_ms": statistics.fmean(
+            item["retrieval_latency_ms"] for item in items
+        ),
+    }
+
+
+def language_summaries(items: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "overall": summarize_results(items),
+        "english_only": summarize_results([item for item in items if item["language"] == "en"]),
+        "chinese_only": summarize_results([item for item in items if item["language"] == "zh-TW"]),
+    }
+
+
+def _setup_components_for(configuration: str) -> tuple[str, ...]:
+    components = ("dense_index_and_model",)
+    if configuration in {HYBRID, HYBRID_RERANK}:
+        components += ("paper_corpus_and_bm25",)
+    if configuration == HYBRID_RERANK:
+        components += ("reranker_model",)
+    return components
+
+
 def run_evaluation(config: AppConfig, *, queries_path: Path, output_path: Path) -> dict[str, Any]:
     manifest = _load_json(config.corpus_manifest_path)
     if not isinstance(manifest, list):
@@ -207,9 +255,11 @@ def run_evaluation(config: AppConfig, *, queries_path: Path, output_path: Path) 
     manifest_ids = {item["paper_id"] for item in manifest}
     queries = load_evaluation_queries(queries_path, manifest_paper_ids=manifest_ids)
 
-    service = RetrievalService(config)
-    service.initialize()
-    active = service.active_index
+    dense_service = RetrievalService(config)
+    dense_setup_started = time.perf_counter()
+    dense_service.initialize()
+    dense_setup_ms = (time.perf_counter() - dense_setup_started) * 1000
+    active = dense_service.active_index
     if active is None:
         raise EvaluationError("Active index identity is unavailable.")
     index_manifest = _load_json(config.chroma_path / "index_manifest.json")
@@ -222,21 +272,38 @@ def run_evaluation(config: AppConfig, *, queries_path: Path, output_path: Path) 
     if index_manifest["chunks_jsonl_sha256"] != prepared["chunks_jsonl_sha256"]:
         raise EvaluationError("Active index chunks hash does not match prepared chunks.")
 
-    per_query = []
+    paper_service = PaperRetrievalService(config, dense_service=dense_service)
+    configuration_results: dict[str, Any] = {}
+    setup_components_ms = {
+        "dense_index_and_model": dense_setup_ms,
+        "paper_corpus_and_bm25": 0.0,
+        "reranker_model": 0.0,
+    }
     evaluation_started = time.perf_counter()
-    for query in queries:
-        started = time.perf_counter()
-        chunk_results = service.retrieve(query.query, top_k=CANDIDATE_CHUNK_COUNT)
-        latency_ms = (time.perf_counter() - started) * 1000
-        paper_rankings = []
-        seen_papers = set()
-        for chunk in chunk_results:
-            if chunk.paper_id in seen_papers:
-                continue
-            seen_papers.add(chunk.paper_id)
-            paper_rankings.append(
+    for configuration, label, description in EVALUATION_CONFIGURATIONS:
+        if configuration == HYBRID:
+            setup_started = time.perf_counter()
+            paper_service.prepare(configuration)
+            setup_components_ms["paper_corpus_and_bm25"] = (
+                time.perf_counter() - setup_started
+            ) * 1000
+        elif configuration == HYBRID_RERANK:
+            setup_started = time.perf_counter()
+            paper_service.prepare(configuration)
+            setup_components_ms["reranker_model"] = (time.perf_counter() - setup_started) * 1000
+
+        per_query = []
+        for query in queries:
+            started = time.perf_counter()
+            chunk_results = paper_service.retrieve(
+                query.query,
+                configuration=configuration,
+                top_k=EVALUATION_TOP_K,
+            )
+            latency_ms = (time.perf_counter() - started) * 1000
+            paper_rankings = [
                 {
-                    "rank": len(paper_rankings) + 1,
+                    "rank": chunk.rank,
                     "paper_id": chunk.paper_id,
                     "title": chunk.title,
                     "best_chunk_id": chunk.chunk_id,
@@ -244,43 +311,46 @@ def run_evaluation(config: AppConfig, *, queries_path: Path, output_path: Path) 
                     "distance": chunk.distance,
                     "chunk_rank": chunk.rank,
                 }
+                for chunk in chunk_results
+            ]
+            ranking_ids = [item["paper_id"] for item in paper_rankings]
+            relevant = set(query.relevant_paper_ids)
+            per_query.append(
+                {
+                    **asdict(query),
+                    "rankings": paper_rankings,
+                    "metrics": {
+                        "recall_at_5": recall_at_k(ranking_ids, relevant, k=EVALUATION_TOP_K),
+                        "mrr_at_5": reciprocal_rank_at_k(ranking_ids, relevant, k=EVALUATION_TOP_K),
+                        "ndcg_at_5": ndcg_at_k(ranking_ids, relevant, k=EVALUATION_TOP_K),
+                    },
+                    "retrieval_latency_ms": latency_ms,
+                }
             )
-            if len(paper_rankings) == EVALUATION_TOP_K:
-                break
-        ranking_ids = [item["paper_id"] for item in paper_rankings]
-        relevant = set(query.relevant_paper_ids)
-        per_query.append(
-            {
-                **asdict(query),
-                "rankings": paper_rankings,
-                "metrics": {
-                    "recall_at_5": recall_at_k(ranking_ids, relevant, k=EVALUATION_TOP_K),
-                    "mrr_at_5": reciprocal_rank_at_k(ranking_ids, relevant, k=EVALUATION_TOP_K),
-                    "ndcg_at_5": ndcg_at_k(ranking_ids, relevant, k=EVALUATION_TOP_K),
-                },
-                "retrieval_latency_ms": latency_ms,
-            }
-        )
+        configuration_results[configuration] = {
+            "label": label,
+            "description": description,
+            "cold_start_setup_ms": sum(
+                setup_components_ms[name] for name in _setup_components_for(configuration)
+            ),
+            "setup_components": _setup_components_for(configuration),
+            "summaries": language_summaries(per_query),
+            "queries": per_query,
+        }
     total_duration = time.perf_counter() - evaluation_started
     scored_query_count = sum(bool(query.relevant_paper_ids) for query in queries)
     result = {
-        "schema_version": 1,
+        "schema_version": 3,
         "timestamp": datetime.now(UTC).isoformat(),
         "query_count": len(queries),
         "scored_query_count": scored_query_count,
         "judgment_method": (
-            "Paper-level relevance was manually curated from manifest titles and sidecar "
-            "abstracts; papers were not independently read in full for relevance judging."
+            "Eleven scored queries use owner-labeled, paper-level relevance judgments curated "
+            "from manifest titles and sidecar abstracts; papers were not independently read in "
+            "full for relevance judging. The twelfth query is an unlabeled out-of-scope case."
         ),
-        "ranking_method": (
-            "Retrieve 20 chunks, preserve Chroma order, deduplicate by first paper occurrence, "
-            "and score the first 5 unique papers."
-        ),
-        "aggregate_metrics": {
-            "recall_at_5": _mean([item["metrics"]["recall_at_5"] for item in per_query]),
-            "mrr_at_5": _mean([item["metrics"]["mrr_at_5"] for item in per_query]),
-            "ndcg_at_5": _mean([item["metrics"]["ndcg_at_5"] for item in per_query]),
-        },
+        "configurations": configuration_results,
+        "setup_components_ms": setup_components_ms,
         "corpus_manifest_sha256": corpus_hash,
         "index_identity": active.index_identity,
         "embedding_model": active.embedding_model,
@@ -307,10 +377,14 @@ def run_evaluation(config: AppConfig, *, queries_path: Path, output_path: Path) 
             "hf_hub_offline": os.environ.get("HF_HUB_OFFLINE") == "1",
             "candidate_chunk_count": CANDIDATE_CHUNK_COUNT,
             "paper_ranking_cutoff": EVALUATION_TOP_K,
+            "reranker_model": config.reranker_model,
+            "latency_note": (
+                "Cold-start setup is measured separately. Query latency is measured only after "
+                "the dense model, BM25 corpus, and configuration-specific reranker are loaded."
+            ),
             "evaluation_duration_seconds": total_duration,
             **_git_runtime(config.project_root),
         },
-        "queries": per_query,
     }
     try:
         atomic_write_json(output_path, result)
@@ -339,12 +413,17 @@ def main(argv: list[str] | None = None) -> int:
             queries_path=queries_path,
             output_path=output_path,
         )
-        print(
-            f"Evaluated {result['query_count']} queries: "
-            f"Recall@5={result['aggregate_metrics']['recall_at_5']:.6f}, "
-            f"MRR@5={result['aggregate_metrics']['mrr_at_5']:.6f}, "
-            f"nDCG@5={result['aggregate_metrics']['ndcg_at_5']:.6f}"
-        )
+        print(f"Evaluated {result['query_count']} queries across four configurations:")
+        for name, configuration in result["configurations"].items():
+            summary = configuration["summaries"]["overall"]
+            print(
+                f"{configuration['label']} {name}: "
+                f"Recall@5={summary['recall_at_5']:.6f}, "
+                f"MRR@5={summary['mrr_at_5']:.6f}, "
+                f"nDCG@5={summary['ndcg_at_5']:.6f}, "
+                f"setup={configuration['cold_start_setup_ms']:.3f}ms, "
+                f"warmed latency={summary['warmed_average_query_latency_ms']:.3f}ms"
+            )
     except (ConfigurationError, RetrievalError, EvaluationError) as error:
         print(f"Evaluation error: {error}", file=sys.stderr)
         return 1

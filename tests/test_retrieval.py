@@ -142,6 +142,47 @@ def test_retrieval_preserves_order_and_assigns_stable_source_ids(tmp_path):
     assert [result.distance for result in results] == [0.12, 0.35]
 
 
+def test_supporting_chunks_are_filtered_and_follow_selected_paper_order(tmp_path):
+    config = base_config(tmp_path)
+    write_runtime_manifests(config)
+
+    class FilteredCollection(FakeCollection):
+        def query(self, *, query_embeddings, n_results, include, where=None):
+            assert query_embeddings == [[0.1, 0.2, 0.3]]
+            assert n_results == 1
+            paper_id = where["paper_id"]
+            selected = {
+                "paper-b": ("chunk-b", "support b", 0.2, 7),
+                "paper-a": ("chunk-a", "support a", 0.3, 3),
+            }[paper_id]
+            chunk_id, text, distance, page = selected
+            return {
+                "ids": [[chunk_id]],
+                "documents": [[text]],
+                "metadatas": [
+                    [
+                        {
+                            "paper_id": paper_id,
+                            "title": f"Title {paper_id}",
+                            "year": 2026,
+                            "venue": "ACL",
+                            "page": page,
+                            "url": f"https://example.invalid/{paper_id}",
+                        }
+                    ]
+                ],
+                "distances": [[distance]],
+            }
+
+    service, _ = make_service(config, FilteredCollection())
+
+    results = service.supporting_chunks([0.1, 0.2, 0.3], ("paper-b", "paper-a"))
+
+    assert [item.paper_id for item in results] == ["paper-b", "paper-a"]
+    assert [item.chunk_id for item in results] == ["chunk-b", "chunk-a"]
+    assert [item.source_id for item in results] == ["[S1]", "[S2]"]
+
+
 def test_missing_empty_index_and_model_mismatch_fail_clearly(tmp_path):
     config = base_config(tmp_path)
     with pytest.raises(RetrievalError, match="pointer.*missing"):

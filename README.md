@@ -1,15 +1,16 @@
 # RAG-based Research Agent Pipeline
 
-這是一個課堂專案，示範如何建立可重現、可測試且具來源追蹤能力的本機 RAG pipeline。專案處理 ACL Anthology 中與 empathy、emotion recognition、emotional support 及 value alignment 有關的固定論文集合，支援中英文 semantic retrieval，並可選擇透過 OpenAI-compatible provider 產生帶來源 ID 的回答與 Markdown research report。
+A multilingual RAG research assistant for retrieving and synthesizing recent ACL papers on empathy, emotion recognition, and value alignment. The system provides deterministic corpus construction, provenance-aware indexing, hybrid retrieval, validated citation IDs, and reproducible evaluation.
 
-本專案定位是小型本機應用與軟體工程作品，不是 production-ready service，也不提供回答正確性保證。
+這是 multilingual RAG research prototype，不是 production-ready service，也不提供回答正確性保證。
 
 ## 功能範圍
 
 - 以固定規則取得 ACL Anthology 2025–2026 論文候選並下載 canonical 50-paper corpus。
 - 使用 `pypdf` 逐頁擷取 PDF 全文，以 750-character chunks 和 100-character overlap 建立 deterministic chunks。
 - 使用 `paraphrase-multilingual-MiniLM-L12-v2` 建立本機 ChromaDB index。
-- 在沒有 LLM credential 的情況下執行 retrieval-only 中英文查詢。
+- 在沒有 LLM credential 的情況下執行 dense 或 paper-level hybrid retrieval-only 中英文查詢。
+- 以 BM25、Reciprocal Rank Fusion 與 optional `BAAI/bge-reranker-v2-m3` 比較四組 retrieval configurations。
 - 選擇性呼叫任意 OpenAI-compatible provider，並驗證回答中的 `[S#]` 是否存在於當次 source map。
 - 產生含 index provenance、checkpoint及程式化source table的Markdown report。
 - 以12題人工整理的小型evaluation set測量paper-level Recall@5、MRR@5與nDCG@5。
@@ -30,6 +31,12 @@ flowchart LR
     H --> I[active_index.json]
     I --> J[RetrievalService]
     J --> K[rag_query.py retrieval-only]
+    F --> R[Paper title + abstract]
+    J --> S[Dense paper candidates]
+    R --> T[BM25 paper candidates]
+    S --> U[RRF + optional BGE reranking]
+    T --> U
+    U --> K
     J --> L[GenerationService optional]
     L --> M[Source-aware answer]
     J --> N[skill_builder.py]
@@ -50,6 +57,7 @@ flowchart LR
 | `data_update.py` | `--prepare-only`及safe full index rebuild entry point |
 | `indexing.py` | Batched embedding、staging collection validation及active pointer更新 |
 | `retrieval.py` | Active index validation與ordered retrieval results |
+| `hybrid_retrieval.py` | Paper-level BM25、RRF、BGE reranking及selected-paper supporting chunks |
 | `generation.py` | Optional OpenAI-compatible generation與citation-ID validation |
 | `skill_builder.py` / `reporting.py` | Checkpointed report orchestration、atomic output及verified source table |
 | `eval/run_retrieval.py` | Paper-level retrieval evaluation與machine-readable results |
@@ -58,7 +66,7 @@ flowchart LR
 
 - Python 3.11或3.12。Python 3.13未驗證，也不在目前支援範圍。
 - [`uv`](https://docs.astral.sh/uv/)。
-- Corpus acquisition需要連線到ACL Anthology；首次index build可能需要下載embedding model。
+- Corpus acquisition需要連線到ACL Anthology；首次index build可能需要下載embedding model，首次BGE reranking也需要下載約2.3 GB的reranker model。
 - Retrieval-only不需要LLM credential。
 - Answer及report generation才需要使用者提供OpenAI-compatible endpoint與key。
 
@@ -91,7 +99,7 @@ LLM_MODEL=openai/gpt-oss-20b
 
 Provider availability、free tier、model名稱、endpoint與rate limits都可能改變；使用前應確認provider目前的官方文件。不要commit真實API key。CI不讀取`.env`，也不接收provider credentials。
 
-可用的path/model overrides列於`.env.example`，包括`RAW_DATA_DIR`、`PROCESSED_DATA_DIR`、`CORPUS_MANIFEST_PATH`、`ACL_ANTHOLOGY_REPO_DIR`、`CHROMA_PERSIST_DIR`、`CHROMA_COLLECTION`、`EMBEDDING_MODEL`與`REPORT_CHECKPOINT_PATH`。
+可用的path/model overrides列於`.env.example`，包括`RAW_DATA_DIR`、`PROCESSED_DATA_DIR`、`CORPUS_MANIFEST_PATH`、`ACL_ANTHOLOGY_REPO_DIR`、`CHROMA_PERSIST_DIR`、`CHROMA_COLLECTION`、`EMBEDDING_MODEL`、`RERANKER_MODEL`與`REPORT_CHECKPOINT_PATH`。
 
 ## Corpus acquisition
 
@@ -150,9 +158,13 @@ uv run python data_update.py --build-index
 uv run python rag_query.py --query "How can multimodal dialogue emotion recognition be improved?" --top-k 5 --retrieval-only
 
 uv run python rag_query.py --query "大型語言模型如何進行價值對齊？" --top-k 5 --retrieval-only --json
+
+uv run python rag_query.py --query "大型語言模型如何進行價值對齊？" --top-k 5 --retrieval-only --retrieval-config hybrid-rerank
 ```
 
 Retrieval會驗證active pointer、index manifest、collection identity、count、embedding model及dimension，而且只呼叫`get_collection()`，不會靜默建立空collection。結果保持Chroma順序，包含rank、`[S#]`、distance、chunk ID、paper metadata、page、URL與passage text。Distance不是accuracy或calibrated probability。
+
+`--retrieval-config`可選`dense`（default）、`dense-dedup`、`hybrid`與`hybrid-rerank`。後三者先以20個dense chunks形成paper candidates；hybrid另取BM25正分的前20篇並用RRF融合，沒有BM25正分時直接沿用dense paper ranking。Rerank模式只在需要時lazy載入BGE，對RRF前20篇的`query`與截斷後`title + abstract`配對評分。最後選5篇unique papers，再從每篇各取一個最佳dense supporting chunk並依paper order配置`[S1]`至`[S5]`。此選項只作用於retrieval-only；generation與report仍維持原dense流程。
 
 ## Optional answer generation
 
@@ -192,25 +204,17 @@ GitHub Actions在push至`main`及targeting `main`的pull requests上執行Python
 
 ## Retrieval evaluation
 
-Evaluation set位於[`eval/queries.jsonl`](eval/queries.jsonl)，包含12題中文cross-language、English topic、exact lookup、multiple-relevant及out-of-scope queries。Paper-level relevance由manifest titles與sidecar abstracts人工整理，沒有使用LLM judge，也沒有為relevance逐篇獨立閱讀全文。
+Evaluation set位於[`eval/queries.jsonl`](eval/queries.jsonl)，包含12題中文cross-language、English topic、exact lookup、multiple-relevant及out-of-scope queries。其中11題具有owner-labeled gold relevance，第12題是沒有gold IDs的out-of-scope case。Judgments只依manifest titles與sidecar abstracts人工整理，沒有使用LLM judge，也沒有為relevance逐篇獨立閱讀全文。
 
-Runner先取得20個ordered chunk candidates，再按paper第一次出現的位置deduplicate，評估前5個unique papers：
+Runner比較四組paper-level設定：A為前5個dense chunks（重複paper會占名額）；B從20個dense chunks取前5篇unique papers；C融合dense-20與positive-score BM25-20；D再以BGE rerank融合後的前20篇。A保留原MiniLM dense baseline。
 
 ```bash
 uv run python -m eval.run_retrieval --output eval/results/release.json
 ```
 
-目前active index的實際結果：
+Runner將overall、English-only及Chinese-only的Recall@5、MRR@5、nDCG@5分開輸出，並區分cold-start setup與resources載入後的warmed average query latency。Aggregate metrics只計算11題具有non-empty owner labels的queries；latency則涵蓋全部12題。Out-of-scope query保存實際rankings，但三個metrics為`null`且不納入macro average。
 
-| Metric | Result |
-|---|---:|
-| Recall@5 | 0.636364 |
-| MRR@5 | 0.613636 |
-| nDCG@5 | 0.565088 |
-
-Aggregate metrics只計算11題具有non-empty gold relevance的queries。Out-of-scope query仍保存實際rankings，但三個metrics為`null`且不納入macro average。完整per-query rankings、distances、latency、runtime、corpus/index identities及ingestion statistics位於tracked [`eval/results/release.json`](eval/results/release.json)；不包含full chunks或secrets。
-
-這些數字只描述此小型人工evaluation set與特定active index，不能外推為一般RAG品質、groundedness或generation品質。
+完整四組per-query rankings、distances、runtime、corpus/index identities及ingestion statistics會寫入tracked [`eval/results/release.json`](eval/results/release.json)；不包含full chunks或secrets。Gold relevance本身由title/abstract整理，因此D同樣使用title/abstract rerank可能帶來評估偏差；結果不能外推為一般RAG品質、groundedness或generation品質。
 
 ## Reproducibility and tracked artifacts
 
