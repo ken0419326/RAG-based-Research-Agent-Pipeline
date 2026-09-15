@@ -21,7 +21,7 @@ import rag_query
 import skill_builder
 """
     environment = os.environ.copy()
-    environment["PYTHONPATH"] = str(PROJECT_ROOT)
+    environment["PYTHONPATH"] = str(PROJECT_ROOT / "src")
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
     data_before = relative_tree(PROJECT_ROOT / "data")
     chroma_before = relative_tree(PROJECT_ROOT / "chroma_db")
@@ -44,7 +44,7 @@ import skill_builder
 def test_config_root_is_stable_in_a_different_current_directory(tmp_path):
     script = "from config import AppConfig; print(AppConfig.load(load_env_file=False).project_root)"
     environment = os.environ.copy()
-    environment["PYTHONPATH"] = str(PROJECT_ROOT)
+    environment["PYTHONPATH"] = str(PROJECT_ROOT / "src")
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
 
     result = subprocess.run(
@@ -66,7 +66,7 @@ def test_ingestion_cli_runs_from_a_different_current_directory(tmp_path):
     environment["RAW_DATA_DIR"] = str(missing_raw_dir)
 
     result = subprocess.run(
-        [sys.executable, str(PROJECT_ROOT / "data_update.py"), "--prepare-only"],
+        [sys.executable, str(PROJECT_ROOT / "src/data_update.py"), "--prepare-only"],
         cwd=tmp_path,
         env=environment,
         capture_output=True,

@@ -7,7 +7,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class ConfigurationError(RuntimeError):
@@ -78,7 +78,7 @@ class AppConfig:
         if not self.raw_dir.is_dir():
             raise ConfigurationError(
                 f"Raw data directory does not exist: {self.raw_dir}. "
-                "Run downloader.py first or set RAW_DATA_DIR."
+                "Run src/downloader.py first or set RAW_DATA_DIR."
             )
         supported_files = (
             path
@@ -93,12 +93,12 @@ class AppConfig:
         if not self.corpus_manifest_path.is_file():
             raise ConfigurationError(
                 f"Corpus manifest does not exist: {self.corpus_manifest_path}. "
-                "Run downloader.py first or set CORPUS_MANIFEST_PATH."
+                "Run src/downloader.py first or set CORPUS_MANIFEST_PATH."
             )
         if not self.raw_dir.is_dir():
             raise ConfigurationError(
                 f"Raw data directory does not exist: {self.raw_dir}. "
-                "Run downloader.py first or set RAW_DATA_DIR."
+                "Run src/downloader.py first or set RAW_DATA_DIR."
             )
 
     def validate_index_build(self) -> None:
@@ -111,7 +111,7 @@ class AppConfig:
         if not chunks_path.is_file():
             raise ConfigurationError(
                 f"Prepared chunks do not exist: {chunks_path}. "
-                "Run data_update.py --prepare-only first."
+                "Run src/data_update.py --prepare-only first."
             )
 
     def validate_retrieval(self) -> None:
@@ -119,7 +119,7 @@ class AppConfig:
         if not self.chroma_path.is_dir() or not any(self.chroma_path.iterdir()):
             raise ConfigurationError(
                 f"ChromaDB index does not exist or is empty: {self.chroma_path}. "
-                "Run data_update.py first or set CHROMA_PERSIST_DIR."
+                "Run src/data_update.py first or set CHROMA_PERSIST_DIR."
             )
 
     def validate_generation(self, *, model_override: str | None = None) -> None:

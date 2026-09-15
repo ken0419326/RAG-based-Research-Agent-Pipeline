@@ -29,7 +29,7 @@ package = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = ["src", "."]
 
 [tool.ruff]
 line-length = 100
@@ -40,4 +40,4 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 # Preserve the existing report prompt verbatim during the configuration-only commit.
-"skill_builder.py" = ["E501"]
+"src/skill_builder.py" = ["E501"]

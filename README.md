@@ -17,18 +17,18 @@ A multilingual RAG research assistant for retrieving and synthesizing recent ACL
 
 ```mermaid
 flowchart LR
-    A[ACL Anthology catalog] --> B[downloader.py]
+    A[ACL Anthology catalog] --> B[src/downloader.py]
     B --> C[corpus/manifest.json]
     B --> D[data/raw PDF + JSON]
-    C --> E[data_update.py --prepare-only]
+    C --> E[src/data_update.py --prepare-only]
     D --> E
     E --> F[data/processed/chunks.jsonl]
-    F --> G[data_update.py --build-index]
+    F --> G[src/data_update.py --build-index]
     C --> G
     G --> H[(New validated Chroma collection)]
     H --> I[active_index.json]
     I --> J[RetrievalService]
-    J --> K[rag_query.py retrieval-only]
+    J --> K[src/rag_query.py retrieval-only]
     F --> R[Paper title + abstract]
     J --> S[Dense paper candidates]
     R --> T[BM25 paper candidates]
@@ -37,7 +37,7 @@ flowchart LR
     U --> K
     J --> L[GenerationService optional]
     L --> M[Source-aware answer]
-    J --> N[skill_builder.py]
+    J --> N[src/skill_builder.py]
     L --> N
     N --> O[Checkpoint + Markdown report]
     J --> P[eval.run_retrieval]
@@ -48,16 +48,16 @@ flowchart LR
 
 | File | Responsibility |
 |---|---|
-| `config.py` | Typed、side-effect-free configuration與command-specific preflight |
-| `corpus.py` | Corpus keyword matching、ranking與manifest models |
-| `downloader.py` | ACL catalog讀取、安全PDF下載與manifest更新 |
-| `documents.py` | Manifest-driven PDF extraction及deterministic page-local chunking |
-| `data_update.py` | `--prepare-only`及safe full index rebuild entry point |
-| `indexing.py` | Batched embedding、staging collection validation及active pointer更新 |
-| `retrieval.py` | Active index validation與ordered retrieval results |
-| `hybrid_retrieval.py` | Paper-level BM25、RRF、BGE reranking及selected-paper supporting chunks |
-| `generation.py` | Optional OpenAI-compatible generation與citation-ID validation |
-| `skill_builder.py` / `reporting.py` | Checkpointed report orchestration、atomic output及verified source table |
+| `src/config.py` | Typed、side-effect-free configuration與command-specific preflight |
+| `src/corpus.py` | Corpus keyword matching、ranking與manifest models |
+| `src/downloader.py` | ACL catalog讀取、安全PDF下載與manifest更新 |
+| `src/documents.py` | Manifest-driven PDF extraction及deterministic page-local chunking |
+| `src/data_update.py` | `--prepare-only`及safe full index rebuild entry point |
+| `src/indexing.py` | Batched embedding、staging collection validation及active pointer更新 |
+| `src/retrieval.py` | Active index validation與ordered retrieval results |
+| `src/hybrid_retrieval.py` | Paper-level BM25、RRF、BGE reranking及selected-paper supporting chunks |
+| `src/generation.py` | Optional OpenAI-compatible generation與citation-ID validation |
+| `src/skill_builder.py` / `src/reporting.py` | Checkpointed report orchestration、atomic output及verified source table |
 | `eval/run_retrieval.py` | Paper-level retrieval evaluation與machine-readable results |
 
 ## Requirements and installation
@@ -114,7 +114,7 @@ Canonical corpus由tracked `corpus/manifest.json`定義，共50篇：2025年21�
 Standalone `value`、`alignment`與`sentiment`不是selection keywords。Manifest建立後，其固定paper IDs不會因catalog新增項目而被自動替換。
 
 ```bash
-uv run python downloader.py
+uv run python src/downloader.py
 ```
 
 Downloader設定HTTP timeout、檢查successful status與`%PDF-`signature，並以temporary file加atomic replace寫入。既有valid PDF不會被覆寫。輸出中的`selected`、`downloaded`、`already existing`及`failed`是分開計數；failed項目不會被算成成功PDF。
@@ -126,7 +126,7 @@ Manifest是paper identity的canonical source。Ignored JSON sidecar保存經pape
 Initial release只支援manifest所列PDF及其associated JSON metadata，不支援standalone Markdown或TXT ingestion。
 
 ```bash
-uv run python data_update.py --prepare-only
+uv run python src/data_update.py --prepare-only
 ```
 
 此命令：
@@ -143,7 +143,7 @@ uv run python data_update.py --prepare-only
 ## Safe full index rebuild
 
 ```bash
-uv run python data_update.py --build-index
+uv run python src/data_update.py --build-index
 ```
 
 此命令只讀取`data/processed/chunks.jsonl`，以batch方式產生embeddings並建立新的Chroma collection，不會原地修改active collection。新collection必須通過chunk count、unique IDs、50-paper coverage、embedding dimension與sample read-back驗證，之後才會atomic更新ignored `index_manifest.json`及`active_index.json`。失敗時既有active pointer不變；舊validated collections不會自動刪除。
@@ -153,11 +153,11 @@ uv run python data_update.py --build-index
 ## Retrieval-only
 
 ```bash
-uv run python rag_query.py --query "How can multimodal dialogue emotion recognition be improved?" --top-k 5 --retrieval-only
+uv run python src/rag_query.py --query "How can multimodal dialogue emotion recognition be improved?" --top-k 5 --retrieval-only
 
-uv run python rag_query.py --query "大型語言模型如何進行價值對齊？" --top-k 5 --retrieval-only --json
+uv run python src/rag_query.py --query "大型語言模型如何進行價值對齊？" --top-k 5 --retrieval-only --json
 
-uv run python rag_query.py --query "大型語言模型如何進行價值對齊？" --top-k 5 --retrieval-only --retrieval-config hybrid-rerank
+uv run python src/rag_query.py --query "大型語言模型如何進行價值對齊？" --top-k 5 --retrieval-only --retrieval-config hybrid-rerank
 ```
 
 Retrieval會驗證active pointer、index manifest、collection identity、count、embedding model及dimension，而且只呼叫`get_collection()`，不會靜默建立空collection。結果保持Chroma順序，包含rank、`[S#]`、distance、chunk ID、paper metadata、page、URL與passage text。Distance不是accuracy或calibrated probability。
@@ -169,7 +169,7 @@ Retrieval會驗證active pointer、index manifest、collection identity、count�
 設定`LLM_*`後執行：
 
 ```bash
-uv run python rag_query.py --query "How can multimodal dialogue emotion recognition be improved?" --top-k 5
+uv run python src/rag_query.py --query "How can multimodal dialogue emotion recognition be improved?" --top-k 5
 ```
 
 Generation prompt將retrieved documents視為untrusted evidence，要求模型只依context回答、使用提供的`[S#]`、忽略document內的instructions，並在資料不足時明確說明。程式會列出valid及invalid source IDs，只從verified retrieval metadata回傳cited source資料。
@@ -179,7 +179,7 @@ Citation-ID validation只能確認某個ID存在於當次source map；它不能�
 ## Report generation
 
 ```bash
-uv run python skill_builder.py --output reports/research_report.md
+uv run python src/skill_builder.py --output reports/research_report.md
 ```
 
 Report workflow保留四個固定research questions，共用retrieval及generation services。Checkpoint包含schema version、completed question IDs及active index identity；corrupt或identity mismatch的checkpoint會被拒絕。Checkpoint與final Markdown均以temporary file加replace寫入。
@@ -207,7 +207,7 @@ Evaluation set位於[`eval/queries.jsonl`](eval/queries.jsonl)，包含12題中�
 Runner比較四組paper-level設定：A為前5個dense chunks（重複paper會占名額）；B從20個dense chunks取前5篇unique papers；C融合dense-20與positive-score BM25-20；D再以BGE rerank融合後的前20篇。A保留原MiniLM dense baseline。
 
 ```bash
-uv run python -m eval.run_retrieval --output eval/results/release.json
+PYTHONPATH=src uv run python -m eval.run_retrieval --output eval/results/release.json
 ```
 
 以下為以乾淨revision `6cad815dae8f5b7cdb32954de8c737406e597041`執行的release結果。Cold setup包含該configuration需要的resource initialization；warmed latency在resources載入後，以全部12題的query時間取平均。
